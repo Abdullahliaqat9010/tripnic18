@@ -8,11 +8,10 @@ An android application for providing a communication channel between the Travell
 2. SDK
 3. NodeJS
 
-Check complete Enviroment Setup guide on [Official Link]
+Check complete Enviroment Setup guide on [Official Link](https://reactnative.dev/docs/environment-setup)
 
 # Installation Guide
 
 1. `npm install` or `yarn`
 2. `npm run sync`
 3. `npx react-native run-android`
-4. `Ramadan Mubarak`
