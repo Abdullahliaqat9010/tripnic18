@@ -1,5 +1,5 @@
-import React from 'react';
-import {StyleSheet,View,Dimensions,TextInput,TouchableOpacity,Text} from 'react-native';
+import React,{useState,useCallback,useEffect} from 'react';
+import {StyleSheet,View,Dimensions,TextInput,BackHandler,Text,Alert} from 'react-native';
 import {Picker} from '@react-native-community/picker'
 import { connect } from 'react-redux';
 import {store} from '../../redux/store';
@@ -7,12 +7,13 @@ import {createUser,navigateToMainApp} from '../../redux/actions/auth_actions'
 import Loading from '../common/loading'
 import Icon from 'react-native-vector-icons/Ionicons'
 import {StyledButton,StyledPicker,StyledTextInput,Toast} from '../../components/styled_components'
+import {validateCreateUserForm} from '../../components/validations'
+import { useFocusEffect } from '@react-navigation/native';
 
 const {width} = Dimensions.get('window')
 
 
 const mapStateToProps = (state)=>{
-  //console.log(state.firebaseReducer.auth.email)
   return{
     email:state.firebaseReducer.auth.email,
     isOrganizer:state.authReducer.isOrganizer,
@@ -23,7 +24,7 @@ const CustomePicker = (props)=>{
   const [selectedValue,setSelectedValue] = React.useState("Not Specified")
   return(
     <Picker
-        mode="dropdown"
+        mode="modal"
         selectedValue={selectedValue}
         style={{ height: 50, width: 160 }}
         onValueChange={(itemValue, itemIndex) => {
@@ -41,78 +42,94 @@ const CustomePicker = (props)=>{
 }
 
 
-class CreateAccount extends React.Component {
-  constructor(props){
-    super(props);
-    this.state = {  
-            email:this.props.route.params.email?this.props.route.params.email:this.props.email,        
-            picUrl:null,
-            name:"",
-            city:"",
-            msg:"",
-            toggleToast:false,
-            gender:"",
-            isLoading:false,
-            genderOptions:[
-              "Not Specified",
-              "Male",
-              "Female",
-              "Other",
-            ],
-            cityOptions:[
-              "Not Specified",
-              "Lahore",
-              "Karachi",
-              "Islamabad",
-            ]
-    }
-}
-  SelectGender = (gender)=>{
-    //console.log(gender)
-    this.setState({gender:gender})
-    //console.log(this.state.gender)
+const CreateAccount = (props) => {
+
+    const [email,setEmail] = useState(props.route.params.email?props.route.params.email:props.email)
+    const [picUrl,setPicUrl] = useState(null)
+    const [name,setName] = useState("")
+    const [city,setCity] = useState("Not Specified")
+    const [gender,setGender] = useState("Not Specified")
+    const [msg,setMsg] = useState("")
+    const [toggleToast,setToggleToast] = useState(false)
+    const [isLoading,setIsLoading] = useState(false)
+    const [genderOptions] = useState([
+                                        "Not Specified",
+                                        "Male",
+                                        "Female",
+                                        "Other",
+                                      ])
+    const [cityOptions] = useState([
+                                      "Not Specified",
+                                      "Lahore",
+                                      "Karachi",
+                                      "Islamabad",
+                                      ])
+  
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        Alert.alert("Warning","Are you sure you want to exit application?",[{
+          text:"Yes",
+          onPress:()=>{BackHandler.exitApp()}
+        },{
+          text:"No",
+        }])  
+        return true;
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () =>
+        BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [])
+  );
+  useEffect(()=>{
+    if(toggleToast === true)
+    {
+      setToggleToast(false)
+    } 
+  },[toggleToast])
+
+  const SelectGender = (gender)=>{
+    setGender(gender)
   }  
 
-  SelectCity = (city)=>{
-   
-    this.setState({city})
+  const SelectCity = (city)=>{
+    setCity(city)
   }
-   createUser = async()=>{
-      //console.log(this.props)
+  const CreateUser = async()=>{
        try {
+            validateCreateUserForm(email,name,gender,city)
             const userProfile = {
-              name:this.state.name,
-              email:this.state.email,
-              gender:this.state.gender,
-              city:this.state.city,
-              profilePicture:this.state.picUrl,
+              name:name,
+              email:email,
+              gender:gender,
+              city:city,
+              profilePicture:picUrl,
             }
-            this.setState({isLoading:true})
-            await store.dispatch(createUser(userProfile,this.props.isOrganizer))
-            this.setState({isLoading:false})
-            if(this.props.isOrganizer){
-              this.props.navigation.navigate("AboutCompany")
+            setIsLoading(true)
+            await store.dispatch(createUser(userProfile,props.isOrganizer))
+            setIsLoading(false)
+            if(props.isOrganizer){
+              props.navigation.navigate("AboutCompany")
             }
             else{
-              store.dispatch(navigateToMainApp())
-              //this.props.navigation.navigate("Phone")
+              props.navigation.navigate("Phone")
+              //store.dispatch(navigateToMainApp())
             }
                
        } 
        catch (error) {
-        this.setState({isLoading:false})
-        console.log(error)
-        //Alert.alert(error)   
+        setIsLoading(false)
+        setMsg(error)
+        setToggleToast(true)
        }
    }
-
-  render(){
     return (
       <>
         {/* <StatusBar translucent backgroundColor="transparent" /> */}
         <View style={styles.container} >
           <View style={styles.iconLeft} >
-            {/* <Icon onPress={()=>this.props.navigation.goBack()} name="ios-arrow-round-back" size={40} /> */}
           </View>
           <View style={styles.interactionContainer}>
             <View style={{justifyContent:"flex-start", width:width, paddingLeft:40}} >
@@ -121,15 +138,15 @@ class CreateAccount extends React.Component {
             <View style={styles.input} >
               <TextInput style={styles.inputText} 
               onChangeText={(email)=>{
-                this.setState({email})
+                setEmail(email)
               }}
-              defaultValue={this.state.email}
+              defaultValue={email}
               placeholder="Enter your Email Address" />
             </View>
             <View style={styles.input} >
               <TextInput  style={styles.inputText} 
               onChangeText={(name)=>{
-                this.setState({name})
+                setName(name)
               }}
               placeholder="Enter Your Full Name" />
             </View>
@@ -138,7 +155,7 @@ class CreateAccount extends React.Component {
                 <Text style={styles.inputText} >City</Text>
               </View>
               <View style={{flex:1,alignItems:"flex-end"}} >
-                <CustomePicker options={this.state.cityOptions} select={this.SelectCity} />
+                <CustomePicker options={cityOptions} select={SelectCity} />
               </View>
             </View>
             
@@ -147,44 +164,27 @@ class CreateAccount extends React.Component {
                 <Text style={styles.inputText} >Gender</Text>
               </View>
               <View style={{flex:1,alignItems:"flex-end"}} >
-                <CustomePicker options={this.state.genderOptions} select={this.SelectGender} />
+                <CustomePicker options={genderOptions} select={SelectGender} />
               </View>
             </View>
             <View style={styles.authButtonContainer}>
-                <TouchableOpacity activeOpacity={0.9} style={
-                  this.props.isOrganizer?styles.organizerCreateAccountButton:styles.travellerCreateAccountButton
-                  } onPress={this.createUser} >
-                  <Text style={styles.ButtonText} >Create Account</Text>
-                </TouchableOpacity>
+                <StyledButton
+                  roundEdged
+                  width={160}
+                  height={40}
+                  onPress={CreateUser}
+                  title="Create Account"
+                  fontSize={20}
+                  loading={isLoading}
+                />
               </View>
            
           </View>
-          <Loading visible={this.state.isLoading} />
-        </View>
-        
-        {/* <View style={styles.container}>
-          
-          <TextInput onChangeText={(name)=>{
-              this.setState({name})
-          }}
-          placeholder="Name"
-          />
-          <TextInput onChangeText={(name)=>{
-              this.setState({name})
-          }}
-          placeholder="Email"
-          defaultValue={this.state.email}
-          />
-
-          <CustomePicker options={this.state.genderOptions} select={this.SelectGender} />
-          <CustomePicker options={this.state.cityOptions} select={this.SelectCity} />
-          <Button title="Create Account" onPress={this.createUser}></Button>
-          <Loading visible={this.state.isLoading} />
-        
-        </View> */}
+          <Loading visible={isLoading} />
+          <Toast message={msg} visible={toggleToast} />
+        </View>      
       </>
     );
-  }
 };
 
 

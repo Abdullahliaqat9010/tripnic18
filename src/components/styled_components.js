@@ -156,7 +156,7 @@ const StyledButton = ({roundEdged,rounded,flat,width,fontSize,height,backgroundC
 }
 
 
-const StyledTextInput = ({width,height,password,isValid,placeholder,onChangeText,keyboardType,maxLength})=>{
+const StyledTextInput = ({width,height,password,isValid,placeholder,onChangeText,keyboardType,maxLength,fontSize})=>{
     
     const [showPassword,setPasswordVisibility] = React.useState(!password) 
 
@@ -176,7 +176,7 @@ const StyledTextInput = ({width,height,password,isValid,placeholder,onChangeText
                 keyboardType={keyboardType?keyboardType:"default"}
                 secureTextEntry={!showPassword} 
                 style={{
-                    fontSize:16,
+                    fontSize:fontSize?fontSize:16,
                     color:"black",
                     flex:1
                 }} 
@@ -202,7 +202,6 @@ const OTPInput = ({onChangeText})=>{
         <View style={{
             width:150,
             height:50,
-            marginVertical:20,
             borderWidth:1,
             borderRadius:10,
             flexDirection:"row",
