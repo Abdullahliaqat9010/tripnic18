@@ -32,11 +32,12 @@ emailSignup = async()=>{
        this.setState({isLoading:true})
        await emailSignup(this.state.email,this.state.password)
        this.setState({isLoading:false})
-       this.props.navigation.navigate("CreateAccount",{isSocialAccount:false})
+       this.props.navigation.push("CreateAccount",{isSocialAccount:false})
   } 
   catch (error) {
+    
     this.setState({isLoading:false})
-    this.setState({msg:error.message},()=>{
+    this.setState({msg:error},()=>{
       this.setState({toggleToast:true},()=>{
         this.setState({toggleToast:false})
       })

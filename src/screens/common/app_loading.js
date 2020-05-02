@@ -6,6 +6,9 @@ import {navigateToMainApp, signout, validateUserOnStart } from '../../redux/acti
 export default class AppLoading extends React.Component {
   constructor(props){
       super(props);
+      this.state = {
+        networkError:false
+      }
   }
   
   componentDidMount(){
@@ -16,13 +19,13 @@ export default class AppLoading extends React.Component {
   updateFunction = async()=>{
     try {
       const isUserValid = await store.dispatch(validateUserOnStart())
-      console.log(isUserValid)
       if(isUserValid !== null){
         if(isUserValid){
           store.dispatch(navigateToMainApp())
         }
         else{
           await store.dispatch(signout())
+          this.updateFunction()
         }
       }
       else{
@@ -31,7 +34,13 @@ export default class AppLoading extends React.Component {
     } 
     catch (error) {  
       //console.log(error)
-      //Alert.alert("Error loading the Application")  
+      Alert.alert("Error:",error,[
+        {
+          text: "Retry",
+          onPress: () => this.updateFunction(),
+          style: "cancel"
+        }
+      ])  
     }
   }
 

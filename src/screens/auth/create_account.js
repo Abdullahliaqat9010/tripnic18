@@ -6,12 +6,13 @@ import {store} from '../../redux/store';
 import {createUser,navigateToMainApp} from '../../redux/actions/auth_actions'
 import Loading from '../common/loading'
 import Icon from 'react-native-vector-icons/Ionicons'
+import {StyledButton,StyledPicker,StyledTextInput,Toast} from '../../components/styled_components'
 
 const {width} = Dimensions.get('window')
 
 
 const mapStateToProps = (state)=>{
-  console.log(state.firebaseReducer.auth.email)
+  //console.log(state.firebaseReducer.auth.email)
   return{
     email:state.firebaseReducer.auth.email,
     isOrganizer:state.authReducer.isOrganizer,
@@ -48,6 +49,8 @@ class CreateAccount extends React.Component {
             picUrl:null,
             name:"",
             city:"",
+            msg:"",
+            toggleToast:false,
             gender:"",
             isLoading:false,
             genderOptions:[
@@ -109,7 +112,7 @@ class CreateAccount extends React.Component {
         {/* <StatusBar translucent backgroundColor="transparent" /> */}
         <View style={styles.container} >
           <View style={styles.iconLeft} >
-            <Icon onPress={()=>this.props.navigation.goBack()} name="ios-arrow-round-back" size={40} />
+            {/* <Icon onPress={()=>this.props.navigation.goBack()} name="ios-arrow-round-back" size={40} /> */}
           </View>
           <View style={styles.interactionContainer}>
             <View style={{justifyContent:"flex-start", width:width, paddingLeft:40}} >

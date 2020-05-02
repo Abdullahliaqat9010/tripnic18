@@ -10,11 +10,19 @@ GoogleSignin.configure({webClientId:'338070094498-fe0uj618cafu7vfd3uj1v9bv2a74bt
 // Signing up with Email
 const emailSignup = (email,password) => { 
   return new Promise(async(res,rej)=>{
+    if(email === "" || password === ""){
+      rej("Empty email or password fields")
+      return
+    }
     try {
       await auth().createUserWithEmailAndPassword(email, password)
       res()
     } catch (error) {
-      rej(error)
+      if(error.code === "auth/unknown"){
+        rej("Network Error. Please check your wifi or mobile data.")
+      }
+      else
+      rej(error.message.split(']')[1])
     }
   })    
   
@@ -41,13 +49,20 @@ const createUser = (userProfile,userRole)=>dispatch=>{
 // Signing in with Firebase
 const emailSignin = (email, password) => {
      return new Promise(async(res,rej)=>{
+      if(email === "" || password === ""){
+        rej("Empty email or password fields")
+        return
+      }
       try {
         await auth().signInWithEmailAndPassword(email, password)
         res()
       } 
       catch (error) {
-        //console.log(error.message)
-        rej(error.message)  
+        if(error.code === "auth/unknown"){
+          rej("Network Error. Please check your wifi or mobile data.")
+        }
+        else
+        rej(error.message.split(']')[1])  
       }
     })
 };
@@ -133,7 +148,9 @@ const validateUserOnStart = () => dispatch => {
       
       }
       catch (error) {
-        
+        if(error.code === "auth/unknown"){
+          rej("Network Error. Please check your wifi or mobile data")
+        }
         rej(error)
         unsubscribe()
       }
@@ -199,7 +216,17 @@ const facebookLogin = () => {
         }
     }
     } catch (e) {
-      rej(e)
+      if(typeof e === "object"){
+        if(e.message === "CONNECTION_FAILURE: CONNECTION_FAILURE" ){
+          rej("Network Error. Please check your wifi or mobile data")
+        }
+        else{
+          rej(e.message)
+        }
+      }
+      else{
+        rej("Login Error.")
+      }
     }
   })
 }
@@ -224,7 +251,7 @@ const googleLogin = () => {
         rej("Google Play Services not available") 
       } 
       else {
-        rej("Google Login Error") 
+        rej("Login Error. Please check your internet connection.") 
       }
       
     }

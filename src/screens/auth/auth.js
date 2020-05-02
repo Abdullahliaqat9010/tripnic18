@@ -5,6 +5,7 @@ import {store} from '../../redux/store';
 import Icon from 'react-native-vector-icons/Ionicons'
 import { facebookLogin, googleLogin, validateUser, navigateToMainApp} from '../../redux/actions/auth_actions'
 import {StyledButton,Toast,StyledTextInput} from '../../components/styled_components'
+import {validateEmail} from '../../components/validations'
 
 const {width} = Dimensions.get('window')
 
@@ -73,13 +74,9 @@ googleLogin = async()=>{
             this.setState({toggleToast:false})
           })
         })
-    }
-    
-}
+    }  
+  }
 
-
-
-  
   render(){
     return (
       <>
@@ -110,7 +107,18 @@ googleLogin = async()=>{
                     height={40} 
                     fontSize={20} 
                     width={135} 
-                    onPress={()=>this.props.navigation.navigate("Login",{email:this.state.email})}
+                    onPress={()=>{
+                      if(validateEmail(this.state.email)){
+                        this.props.navigation.navigate("Login",{email:this.state.email})
+                      }
+                      else{
+                        this.setState({msg:"Invalid or Empty email address"},()=>{
+                          this.setState({toggleToast:true},()=>{
+                            this.setState({toggleToast:false})
+                          })
+                        })
+                      }
+                    }}
                     />
                 </View>
                 <View style={{paddingHorizontal:10}} >
@@ -120,7 +128,18 @@ googleLogin = async()=>{
                     height={40} 
                     fontSize={20} 
                     width={135}   
-                    onPress={()=>this.props.navigation.navigate("Signup",{email:this.state.email})}
+                    onPress={()=>{
+                      if(validateEmail(this.state.email)){
+                        this.props.navigation.navigate("Signup",{email:this.state.email})
+                      }
+                      else{
+                        this.setState({msg:"Invalid or Empty email address"},()=>{
+                          this.setState({toggleToast:true},()=>{
+                            this.setState({toggleToast:false})
+                          })
+                        })
+                      }
+                    }}
                     />
                 </View>
                 
@@ -211,7 +230,6 @@ const styles = StyleSheet.create({
 
   orConnectWithText:{
     color:"#989595",
-    //paddingBottom:20
   },
 
 });
