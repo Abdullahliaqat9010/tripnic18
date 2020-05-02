@@ -32,4 +32,13 @@ const validatePhoneCode = (code) =>{
     }
 }
 
-export {validateEmail,validateCreateUserForm,validatePhoneNumber,validatePhoneCode}
+const validateCompanyInfo = (companyName,about) =>{
+    if(companyName === ""){
+        throw "You must enter a Company Name"
+    }
+    if(about === ""){
+        throw "Write something about your company"
+    }
+}
+
+export {validateEmail,validateCreateUserForm,validatePhoneNumber,validatePhoneCode,validateCompanyInfo}

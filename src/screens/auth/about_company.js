@@ -1,39 +1,73 @@
-import React from 'react'
-import {StyleSheet,View,Dimensions,TextInput,Text,TouchableOpacity} from 'react-native';
+import React,{useCallback,useEffect,useState} from 'react'
+import {StyleSheet,View,Dimensions,TextInput,Text,Alert,BackHandler} from 'react-native';
 import {store} from '../../redux/store';
-import {addCompanyInfo,navigateToMainApp} from '../../redux/actions/auth_actions'
+import {addCompanyInfo} from '../../redux/actions/auth_actions'
+import {validateCompanyInfo} from '../../components/validations'
 import Loading from '../common/loading'
-import Icon from 'react-native-vector-icons/Ionicons'
+import { Toast,StyledButton } from '../../components/styled_components';
+import { useFocusEffect } from '@react-navigation/native';
 
 const {width} = Dimensions.get('window')
 
-export default class AboutCompany extends React.Component{
-    constructor(props){
-        super(props)
-        this.state = {
-            companyName:"",
-            about:"",
-            isLoading:false,
+const AboutCompany = (props)=>{
+    
+  const [companyName,setCompanyName] = useState("")
+  const [about,setAbout] = useState("")
+  const [msg,setMsg] = useState("")
+  const [isLoading,setIsLoading] = useState(false)
+  const [toggleToast,setToggleToast] = useState(false)
+  
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        Alert.alert("Warning","Are you sure you want to leave Signup?",[{
+          text:"Yes",
+          onPress: async ()=>{
+            try {
+              await store.dispatch(signout())
+              console.log("logged out")
+              props.navigation.popToTop()
+            } catch (error) {
+              console.log(error)
+            }
+          }
+        },{
+          text:"No",
+        }])  
+        return true;
+      };
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+      return () =>
+        BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [])
+  );
+  useEffect(()=>{
+    if(toggleToast === true)
+    {
+      setToggleToast(false)
+    } 
+  },[toggleToast])
+
+  const AddCompanyInfo = async ()=>{
+        try {
+            validateCompanyInfo(companyName,about)
+            setIsLoading(true)
+            await store.dispatch(addCompanyInfo(companyName,about))
+            setIsLoading(false)
+            props.navigation.navigate("Phone")
+        } 
+        catch (error) {
+            console.log(error)
+            setIsLoading(false)
+            setMsg(error)
+            setToggleToast(true)
         }
     }
 
-    AddCompanyInfo = async ()=>{
-        try {
-            this.setState({isLoading:true})
-            await store.dispatch(addCompanyInfo(this.state.companyName,this.state.about))
-            this.setState({isLoading:false})
-            //this.props.navigation.navigate("SocialLinks")
-            store.dispatch(navigateToMainApp())
-        } catch (error) {
-            console.log(error)
-        }
-    }
-    
-    render(){
         return(
             <View style={styles.container} >
           <View style={styles.iconLeft} >
-            <Icon onPress={()=>this.props.navigation.goBack()} name="ios-arrow-round-back" size={40} />
+            
           </View>
           <View style={styles.interactionContainer}>
             <View style={{justifyContent:"flex-start", width:width, paddingLeft:40}} >
@@ -42,7 +76,7 @@ export default class AboutCompany extends React.Component{
             <View style={styles.input} >
               <TextInput style={styles.inputText} 
               onChangeText={(companyName)=>{
-                this.setState({companyName})
+                setCompanyName(companyName)
               }}
               placeholder="Enter Company Name" />
             </View>
@@ -50,30 +84,34 @@ export default class AboutCompany extends React.Component{
               <TextInput style={styles.inputTextMultiline}
                 multiline 
                 onChangeText={(about)=>{
-                    this.setState({about})
+                  setAbout(about)
                 }}
                 placeholder="About Your Company (max 500 words)" />
             </View>
             <View style={styles.authButtonContainer}>
-                <TouchableOpacity activeOpacity={0.9} style={styles.organizerLoginButton
+                {/* <TouchableOpacity activeOpacity={0.9} style={styles.organizerLoginButton
                   } onPress={this.AddCompanyInfo} >
                   <Text style={styles.ButtonText} >Add Info</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
+                <StyledButton
+                  title="Add Info"
+                  onPress={AddCompanyInfo}
+                  roundEdged
+                  width={135}
+                  height={40}
+                  fontSize={20}
+                  loading={isLoading}
+                />
               </View>
            
           </View>
-          <Loading visible={this.state.isLoading} />
+          <Loading visible={isLoading} />
+          <Toast message={msg} visible={toggleToast} />
         </View>
-            // <View style={{flex:1,alignItems:"center",justifyContent:"center"}}>
-            //     <Text>Add Company Info</Text>
-            //     <TextInput onChangeText={(name)=>this.setState({companyName:name})} placeholder="Company Name" />
-            //     <TextInput multiline onChangeText={(about)=>this.setState({about:about})} placeholder="Company About" />
-            //     <Button title="Add Company Info" onPress={this.AddCompanyInfo} />
-            //     <Loading visible={this.state.isLoading} />
-            // </View>
         )
     }
-}
+
+export default AboutCompany
 
 const styles = StyleSheet.create({
     container:{

@@ -284,15 +284,24 @@ const verifyCode = (code,verificationId)  => {
       auth.PhoneAuthProvider.credential()
       const credentials = auth.PhoneAuthProvider.credential(verificationId,code)
       await auth().currentUser.updatePhoneNumber(credentials)
+      console.log("verification")
       res()
     } 
     catch (error) {
       if(error.code === "auth/invalid-verification-code"){
         rej("Invalid Verification Code")
       }
-      else if(error.code === "auth/session-expired")
-      rej("Verification Code Expired. Try Resending")
-    }
+      else if(error.code === "auth/session-expired"){
+        rej("Verification Code Expired. Try Resending")
+      }
+      else if(error.code === "auth/credential-already-in-use"){
+        rej("This mobile number is already registered")
+      }
+      else{
+        rej(error.message)
+      }
+      
+      }
   })
 }
 
@@ -330,7 +339,7 @@ const addCompanyInfo = (name,about)=>dispatch=>{
           rej("No user currently logged in")
         }
       } catch (error) {
-        rej(error)
+        rej(error.message)
       }
     })
   })

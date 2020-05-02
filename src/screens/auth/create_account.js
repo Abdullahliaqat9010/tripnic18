@@ -68,7 +68,7 @@ const CreateAccount = (props) => {
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
-        Alert.alert("Warning","Are you sure you want to exit?",[{
+        Alert.alert("Warning","Are you sure you want to exit application?",[{
           text:"Yes",
           onPress:()=>{BackHandler.exitApp()}
         },{
