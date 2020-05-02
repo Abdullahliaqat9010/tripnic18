@@ -284,7 +284,7 @@ const verifyCode = (code,verificationId)  => {
       auth.PhoneAuthProvider.credential()
       const credentials = auth.PhoneAuthProvider.credential(verificationId,code)
       await auth().currentUser.updatePhoneNumber(credentials)
-      console.log("verification")
+      //console.log("verification")
       res()
     } 
     catch (error) {
