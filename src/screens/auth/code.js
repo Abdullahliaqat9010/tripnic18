@@ -5,6 +5,7 @@ import {verifyCode,sendPhoneVerificationCode,navigateToMainApp} from '../../redu
 import Loading from '../common/loading'
 import {StyledButton,OTPInput,Toast} from '../../components/styled_components'
 import {validatePhoneCode} from '../../components/validations'
+import { useFocusEffect } from '@react-navigation/native';
 
 const Code = (props) => {
 
@@ -15,6 +16,25 @@ const Code = (props) => {
   const [isResendLoading,setIsResendLoading] = useState(false)
   const [timer,setTimer] = useState(59)
   const [verificationId,setVerificationId] = useState(props.route.params?.verificationId)   
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        Alert.alert("Warning","Are you sure you want to exit application?",[{
+          text:"Yes",
+          onPress:()=>{BackHandler.exitApp()}
+        },{
+          text:"No",
+        }])  
+        return true;
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () =>
+        BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [])
+  );
 
   useEffect(()=>{
     if(toggleToast === true){

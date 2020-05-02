@@ -1,53 +1,68 @@
-import React from 'react';
-import {StyleSheet,View,TextInput,Dimensions, Alert,Text, TouchableOpacity} from 'react-native';
+import React,{useCallback,useState,useEffect} from 'react';
+import {StyleSheet,View,TextInput,Dimensions, Alert,Text, TouchableOpacity,BackHandler} from 'react-native';
 import { sendPhoneVerificationCode, navigateToMainApp } from '../../redux/actions/auth_actions';
 import Loading from '../common/loading'
 import { store } from '../../redux/store';
 import {StyledButton,Toast} from '../../components/styled_components'
 import {validatePhoneNumber} from '../../components/validations'
+import { useFocusEffect } from '@react-navigation/native';
 const {width} = Dimensions.get('window')
 
-export default class Phone extends React.Component {
-  constructor(props){
-    super(props);
-    this.state = {
-        phone:"",
-        msg:"",
-        toggleToast:false,
-        isLoading:false
-    }
-  }
+const Phone = (props) => {
   
-  sendVerificationCode = async ()=>{
+  const [phone,setPhone] = useState("")
+  const [msg,setMsg] = useState("")
+  const [toggleToast,setToggleToast] = useState(false)
+  const [isLoading,setIsLoading] = useState(false)
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        Alert.alert("Warning","Are you sure you want to exit application?",[{
+          text:"Yes",
+          onPress:()=>{BackHandler.exitApp()}
+        },{
+          text:"No",
+        }])  
+        return true;
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () =>
+        BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [])
+  );
+
+  useEffect(()=>{
+    if(toggleToast === true){
+      setToggleToast(false)
+    }
+  },[toggleToast])   
+
+  const sendVerificationCode = async ()=>{
     try {
-      const phone_number = '+92'+this.state.phone
+      const phone_number = '+92'+phone
       validatePhoneNumber(phone_number)
-      this.setState({isLoading:true})
+      setIsLoading(true)
       const verificationId = await sendPhoneVerificationCode(phone_number)
-      this.setState({isLoading:false})
-      this.props.navigation.navigate("Code",{verificationId,phone:phone_number})  
+      setIsLoading(false)
+      props.navigation.navigate("Code",{verificationId,phone:phone_number})  
     } catch (error) {
-      this.setState({isLoading:false})
-      this.setState({msg:error},()=>{
-        this.setState({toggleToast:true},()=>{
-        this.setState({toggleToast:false})
-      })
-    })   
-  
-    }
-    
+      setIsLoading(false)
+      setMsg(error)
+      setToggleToast(true)
+    } 
   }
-  skipPhoneVerification = ()=>{
+
+  const skipPhoneVerification = ()=>{
     store.dispatch(navigateToMainApp())
   }
 
-  render(){
     return (
       <>
         {/* <StatusBar translucent backgroundColor="transparent" /> */}
         <View style={styles.container} >
-          
-              
+                 
                 <Text style={{fontSize:22,fontWeight:"bold",paddingBottom:25}}>Verify Phone Number</Text>
                 
                 <View style={{
@@ -64,7 +79,7 @@ export default class Phone extends React.Component {
                     style={{fontSize:20}}
                     keyboardType="numeric"
                     onChangeText={(phone)=>{
-                      this.setState({phone})
+                      setPhone(phone)
                     }}
                     placeholder="* * * * * * *"
                     maxLength={10}    
@@ -73,30 +88,29 @@ export default class Phone extends React.Component {
              
                 <View style={{paddingVertical:25}} >
                   <StyledButton
-                    loading={this.state.isLoading}
+                    loading={isLoading}
                     roundEdged 
                     height={40} 
                     fontSize={20} 
                     width={135}
                     title="Send Code"
-                    onPress={this.sendVerificationCode}
+                    onPress={sendVerificationCode}
                   />
                 </View>
                 <TouchableOpacity
                   style={{alignItems:"center",justifyContent:"center"}} 
-                  onPress={this.skipPhoneVerification}
+                  onPress={skipPhoneVerification}
                 >
                   <Text>Skip</Text>
-                </TouchableOpacity>
-            
-            <Toast message={this.state.msg} visible={this.state.toggleToast} />  
-            <Loading visible={this.state.isLoading} />      
-        </View>
-        
+                </TouchableOpacity>       
+            <Toast message={msg} visible={toggleToast} />  
+            <Loading visible={isLoading} />      
+        </View> 
       </>
     );
   }
-};
+
+export default Phone
 
 const styles = StyleSheet.create({
   container:{
