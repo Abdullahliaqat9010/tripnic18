@@ -41,7 +41,7 @@ const createUser = (userProfile,userRole)=>dispatch=>{
         })
     } 
     catch (error) {
-      rej(error)
+      rej(error.message)
     }
   })
 }
@@ -263,35 +263,37 @@ const sendPhoneVerificationCode = (phone) => {
       return new Promise((res,rej)=>{
         auth().verifyPhoneNumber(phone,90).on('state_changed', (phoneAuthSnapshot) => {
           console.log(phoneAuthSnapshot)
-          if(phoneAuthSnapshot.state === "sent"){
-            res(phoneAuthSnapshot.verificationId)
-            return
-          }
-          else if(phoneAuthSnapshot.state === "error"){
+          if(phoneAuthSnapshot.state === "error"){
             rej("An error occured while verifying your phone")
             return
           }
-          else if(phoneAuthSnapshot.state === "verified"){
-            if(phoneAuthSnapshot.verificationId === null){
-              rej("This number is already associated with an account")
-              return
-            }
-            else{
+          else{
               res(phoneAuthSnapshot.verificationId)
               return
-            }
           }
         }, (error) => {
-          rej(error)
+          rej(error.message)
           return
         });      
       })
 }
 
 const verifyCode = (code,verificationId)  => {
-  auth.PhoneAuthProvider.credential()
-  const credentials = auth.PhoneAuthProvider.credential(verificationId,code)
-  return auth().currentUser.updatePhoneNumber(credentials)
+  return new Promise( async (res,rej)=>{
+    try {
+      auth.PhoneAuthProvider.credential()
+      const credentials = auth.PhoneAuthProvider.credential(verificationId,code)
+      await auth().currentUser.updatePhoneNumber(credentials)
+      res()
+    } 
+    catch (error) {
+      if(error.code === "auth/invalid-verification-code"){
+        rej("Invalid Verification Code")
+      }
+      else if(error.code === "auth/session-expired")
+      rej("Verification Code Expired. Try Resending")
+    }
+  })
 }
 
 const navigateToMainApp = () => dispatch => {
