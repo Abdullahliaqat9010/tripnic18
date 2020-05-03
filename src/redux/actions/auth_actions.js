@@ -75,8 +75,9 @@ const validateUser = (userRole) => dispatch => {
       try {  
         if(user){
           const {claims} = await user.getIdTokenResult(true)
-          const doc = await firestore().collection(claims.organizer?'organizers':'travellers').doc(user.uid).get()
-          if(claims.organizer !== null){
+          console.log(claims.organizer)
+          if(claims.organizer !== undefined){
+            const doc = await firestore().collection(claims.organizer?'organizers':'travellers').doc(user.uid).get()
             if(claims.organizer === userRole){
               if(doc.exists){
                 unsubscribe()
@@ -113,28 +114,39 @@ const validateUserOnStart = () => dispatch => {
       try {
         if(user){
           const {claims} = await user.getIdTokenResult(true)
-          const doc = await firestore().collection(claims.organizer?'organizers':'travellers').doc(user.uid).get()
-        if(doc.exists){
-            
-            res(true)
-            dispatch({
-              type:"ProfileFetchedOnStart",
-              userProfile:doc.data(),
-              isOrganizer:claims.organizer
-            })
-            unsubscribe()
-          }
-          else{
-            
+          if(claims.organizer === undefined){
             res(false)
             dispatch({
               type:"ProfileFetchedOnStart",
               userProfile:null,
-              isOrganizer:claims.organizer
+              isOrganizer:null
             })
             unsubscribe()
           }
-        }
+          else{
+            const doc = await firestore().collection(claims.organizer?'organizers':'travellers').doc(user.uid).get()
+            if(doc.exists){ 
+                res(true)
+                dispatch({
+                  type:"ProfileFetchedOnStart",
+                  userProfile:doc.data(),
+                  isOrganizer:claims.organizer
+                })
+                unsubscribe()
+              }
+              else{
+                
+                res(false)
+                dispatch({
+                  type:"ProfileFetchedOnStart",
+                  userProfile:null,
+                  isOrganizer:claims.organizer
+                })
+                unsubscribe()
+              }
+            }
+          }
+          
         else{
           
           res(null)
@@ -268,8 +280,20 @@ const sendPhoneVerificationCode = (phone) => {
             return
           }
           else{
+            if(phoneAuthSnapshot.state === "verified"){
+              if(phoneAuthSnapshot.code === null){
+                rej("This mobile number is already associated with an account. Try a different number")
+              }
+              else{
+                res(phoneAuthSnapshot.verificationId)
+                return
+              }
+            }
+            else{
               res(phoneAuthSnapshot.verificationId)
               return
+            }
+            
           }
         }, (error) => {
           rej(error.message)
