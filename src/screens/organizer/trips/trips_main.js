@@ -3,9 +3,9 @@ import {View,Text,TouchableOpacity,Image, Dimensions,FlatList,StyleSheet,Alert} 
 import { store } from '../../../redux/store'
 import { signout } from '../../../redux/actions/auth_actions'
 import {FAB} from 'react-native-paper'
-import AddTrip from './add_trip'
+import {Toast} from '../../../components/styled_components'
 import Icon from 'react-native-vector-icons/Ionicons'
-import {fetchTrips} from '../../../redux/actions/app_actions'
+import {fetchTrips,deleteTrip} from '../../../redux/actions/app_actions'
 import {ProgressBarAndroid} from '@react-native-community/progress-bar-android'
 const {width} = Dimensions.get("window")
 
@@ -38,7 +38,7 @@ const TripCard = ({trip,navigateToEditTrip,deleteTrip})=>{
                             ])
                         }
                     }
-                ])
+                ],{ cancelable: true })
             }}
             activeOpacity={0.9}
             style={{
@@ -53,6 +53,7 @@ const TripCard = ({trip,navigateToEditTrip,deleteTrip})=>{
                 <Image
                     source={{uri:trip.thumbnail}}
                     style={{flex:4,borderBottomLeftRadius:10,borderTopLeftRadius:10}}
+                    defaultSource={require('../../../assets/placeholder.png')}
                 />
            
             <View style={{flex:3,paddingHorizontal:10,justifyContent:"center"}} >
@@ -63,11 +64,11 @@ const TripCard = ({trip,navigateToEditTrip,deleteTrip})=>{
                 </View>
                 <View style={{flexDirection:"row",alignItems:"center",marginBottom:5}} >
                     <Icon name="md-person" size={15} />
-                    <Text style={{marginLeft:5}} >{trip.capacity}</Text>
+                    <Text style={{marginLeft:5}} >{trip.capacity+' persons'}</Text>
                 </View>
                 <View style={{flexDirection:"row",alignItems:"center",marginBottom:5}} >
                     <Icon name="ios-pricetag" size={15} />
-                    <Text style={{marginLeft:5}} >{trip.price}</Text>
+                    <Text style={{marginLeft:5}} >{'Rs '+trip.price}</Text>
                 </View>
             </View>
         </TouchableOpacity>
@@ -81,33 +82,64 @@ export default class TripsMain extends React.Component{
         this.state={
             refreshing:false,
             loading:false,
-           data:[
-               
-            ]
+           data:[]
         }
     }
 
     navigateToEditTrip = (id)=>{
-        this.props.navigation.navigate("Edit Trip")
+        this.props.navigation.navigate("Edit Trip",{id:id})
     }
     deleteTrip = async (id)=>{
-        console.log("fetching")
-        await fetch('https://images.unsplash.com/photo-1500964757637-c85e8a162699?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb')
-        
-        console.log("delete trip "+id)
+        try {
+            await deleteTrip(id)
+            this.fetchTrips()
+            this.setState({msg:"Successfully deleted"},()=>{
+                this.setState({toggleToast:true},()=>{
+                  this.setState({toggleToast:false})
+                })
+            })
+        } catch (error) {
+            this.setState({msg:error},()=>{
+                this.setState({toggleToast:true},()=>{
+                  this.setState({toggleToast:false})
+                })
+            })
+        }
+    
     }
     fetchTrips = async()=>{
-        const data = await fetchTrips()
-        this.setState({data:data},()=>{
+        try {
+            const data = await fetchTrips()
+            this.setState({data:data},()=>{
+                this.setState({refreshing:false})
+            })
+        } catch (error) {
             this.setState({refreshing:false})
-        })
+            this.setState({msg:error},()=>{
+                this.setState({toggleToast:true},()=>{
+                  this.setState({toggleToast:false})
+                })
+            })
+        }
     }
+    _unsubscribe = null
 
     async componentDidMount(){
+        
+        this._unsubscribe = this.props.navigation.addListener('focus', async() => {
+            this.setState({loading:true})
+            await this.fetchTrips()
+            this.setState({loading:false})
+        });
+        
         this.setState({loading:true})
         await this.fetchTrips()
         this.setState({loading:false})
     }
+
+    componentWillUnmount() {
+        this._unsubscribe();
+      }
 
     render(){
         return(
@@ -131,9 +163,9 @@ export default class TripsMain extends React.Component{
                             </View>
                         )
                     }}
-                    onEndReached={()=>{
-                        console.log("end reached")
-                    }}
+                    // onEndReached={()=>{
+                    //     //console.log("end reached")
+                    // }}
                     ListFooterComponent={()=>{
                         return(
                             <View style={{height:50}} />
@@ -167,7 +199,8 @@ export default class TripsMain extends React.Component{
                 icon="plus"
                 color="white"
                 onPress={() => this.props.navigation.navigate("Add Trip")}
-                />
+            />
+            <Toast message={this.state.msg} visible={this.state.toggleToast} />
             </View>
         )
     }
