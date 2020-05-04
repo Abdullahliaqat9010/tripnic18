@@ -16,7 +16,7 @@ const formatDate = (_date)=>{
     return formatedDate
 }
 
-const StyledDatePicker = ({onChangeDate,defaultDate})=>{
+const StyledDatePicker = ({onChangeDate,defaultDate,disabled})=>{
     const [date, setDate] = useState(defaultDate?new Date(defaultDate):new Date());
     const [readableDate,setReadableDate] = useState(formatDate(date))
     const [show, setShow] = useState(false);
@@ -42,7 +42,9 @@ const StyledDatePicker = ({onChangeDate,defaultDate})=>{
   return(
     <View>
     <View>
-      <TouchableOpacity style={{
+      <TouchableOpacity 
+        disabled={disabled}
+        style={{
           borderWidth:1,
           width:135,
           height:40,

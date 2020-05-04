@@ -125,7 +125,16 @@ const fetchTrips = ()=>{
 const deleteTrip = (id)=>{
   return new Promise(async(res,rej)=>{
     try {
-      await firestore().collection('trips').doc(id).delete()
+      const docRef = firestore().collection('trips').doc(id)
+      const detailsRef = firestore().collection('trips/'+id+'/more_info').doc('details')
+      const dataRef = firestore().collection('trips/'+id+'/more_info').doc('private_data')
+      const scheduleRef = firestore().collection('trips/'+id+'/more_info').doc('schedule')
+      const batch = firestore().batch()
+      batch.delete(detailsRef)
+      batch.delete(dataRef)
+      batch.delete(scheduleRef)
+      batch.delete(docRef)
+      await batch.commit()
       res()
     } catch (error) {
       rej(error.message)

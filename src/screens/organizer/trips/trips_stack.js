@@ -4,6 +4,7 @@ import TripsMain from './trips_main'
 import AddTrip from './add_trip'
 import EditTrip from './edit_trip'
 import AddSchedule from './add_schedule'
+import PreviewTrip from './preview_trip'
 
 const Stack = createStackNavigator()
 
@@ -32,6 +33,13 @@ const TripsStack = ({navigation,route})=>{
                 }}
             />
             <Stack.Screen name="Add Schedule" component={AddSchedule}
+                options={{
+                    headerTitleContainerStyle: {
+                        left: 50,
+                    },
+                }}
+            />
+             <Stack.Screen name="Preview" component={PreviewTrip}
                 options={{
                     headerTitleContainerStyle: {
                         left: 50,
