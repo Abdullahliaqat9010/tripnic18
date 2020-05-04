@@ -3,11 +3,12 @@ import {View,ScrollView,Text,StyleSheet,Dimensions,TouchableOpacity,Image, TextI
 import storage from '@react-native-firebase/storage'
 import {StyledDatePicker,StyledPicker,StyledTextInput, StyledButton,Toast} from '../../../components/styled_components'
 import CheckBox from '@react-native-community/checkbox';
-import {addNewTrip} from '../../../redux/actions/app_actions'
+import {editTrip,fetchTripDetials} from '../../../redux/actions/app_actions'
 import ImagePicker from 'react-native-image-picker'
 import AddSchedule from './add_schedule'
 import Loading from '../../common/loading'
 import {validateTripInfo} from '../../../components/validations'
+import {ProgressBarAndroid} from '@react-native-community/progress-bar-android'
 
 const {width} = Dimensions.get('window')
 
@@ -15,16 +16,19 @@ class EditTrip extends React.Component {
     constructor(props){
         super(props)
         this.state = {
+            id:props.route.params?.id,
+            isFetchingDetails:false,
             isLoading:false,
             toggleToast:false,
             msg:"",
             isScheduleModalOpen:false,
             src:"",
-            path:"",
+            path:"notSelected",
             filename:"",
             capacity:0,
             title:"",
             to:"",
+            thumbnail:"https://sweettutos.com/wp-content/uploads/2015/12/placeholder.png",
             from:"",
             description:"",
             start_date:null,
@@ -45,7 +49,6 @@ class EditTrip extends React.Component {
                 "Not specified",
                 "Male",
                 "Female",
-                "Other"
             ],
             toOptions:[
                 "Not specified",
@@ -60,12 +63,17 @@ class EditTrip extends React.Component {
         }
     }
 
-    addTrip = async()=>{
+    editTrip = async()=>{
         try {
             validateTripInfo(this.state)
             this.setState({isLoading:true})
-            await addNewTrip(this.state)
+            await editTrip(this.state)
             this.setState({isLoading:false})
+            this.setState({msg:"Successfully updated trip details"},()=>{
+                this.setState({toggleToast:true},()=>{
+                  this.setState({toggleToast:false})
+                })
+            })
             this.props.navigation.goBack()
         } catch (error) {
             this.setState({isLoading:false})
@@ -84,10 +92,7 @@ class EditTrip extends React.Component {
         this.setState({isScheduleModalOpen:true})
     }
     selectImage = ()=>{        
-        const options = {
-            allowsEditing:true
-        }
-        ImagePicker.launchImageLibrary(options,async (response) => {
+        ImagePicker.launchImageLibrary({},async (response) => {
             // Same code as in above section!
             if (response.didCancel) {
                 console.log('User cancelled image picker');
@@ -118,10 +123,55 @@ class EditTrip extends React.Component {
         this.setState({end_date:date.getTime()})
     }
 
-    render(){
-        return(
+    async componentDidMount(){
+        this.setState({isFetchingDetails:true})
+        await this.fetchDetails()
+    }
+
+    fetchDetails = async()=>{
+        try {
+            const trip = await fetchTripDetials(this.props.route.params?.id)
+            this.setState({
+                title:trip.title,
+                to:trip.to,
+                from:trip.from,
+                description:trip.description,
+                start_date:trip.start_date,
+                end_date:trip.end_date,
+                price:trip.price,
+                capacity:trip.capacity,
+                discount:trip.discount,
+                food:{...trip.food},
+                accomodation:trip.accomodation,
+                conveyance:trip.conveyance,
+                gender:trip.gender,
+                pickup:trip.pickup,
+                thumbnail:trip.thumbnail,
+                schedule:{...trip.schedule}
+            },()=>{
+                this.setState({isFetchingDetails:false})
+            })
             
-                            
+        } catch (error) {
+            this.setState({isFetchingDetails:false})
+            this.setState({msg:error},()=>{
+                this.setState({toggleToast:true},()=>{
+                  this.setState({toggleToast:false})
+                })
+            })
+        }
+    }
+
+    render(){
+        if(this.state.isFetchingDetails){
+            return(
+                <View style={{flex:1,alignItems:"center",justifyContent:"center"}} >
+                    <ProgressBarAndroid/>
+                </View>
+            )
+        }
+        else
+        return(             
                 <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{backgroundColor:"white",alignItems:"center",justifyContent:"flex-start"}} >    
                     
                     <TouchableOpacity
@@ -130,33 +180,31 @@ class EditTrip extends React.Component {
                     >
                         <Image style={{width:width,height:250}} source={
                             this.state.src?{uri:this.state.src}:
-                            require('../../../assets/image_upload_placeholder.png')
+                            {uri:this.state.thumbnail}
                             } 
                         />
                             
                         
                     </TouchableOpacity>
 
-{/*************************************** Title  ******************************************/}
 
                     <View style={styles.container} >
                         <TextInput style={styles.title} multiline maxLength={30} placeholder="Add Title" 
                             onChangeText={(title)=>this.setState({title:title})}
+                            defaultValue={this.state.title}
                         ></TextInput>
                     </View>
 
 
-{/*************************************** To and From  ******************************************/}
 
                     <View style={styles.pickers} >
-                        <StyledPicker width={250} title="To" select={this.selectTo} options={this.state.toOptions} />
+                        <StyledPicker width={250} defaultValue={this.state.to} title="To" select={this.selectTo} options={this.state.toOptions} />
                     </View>
                     <View style={styles.pickers} >
-                        <StyledPicker width={250} title="From" select={this.selectFrom} options={this.state.fromOptions} />
+                        <StyledPicker width={250} defaultValue={this.state.from} title="From" select={this.selectFrom} options={this.state.fromOptions} />
                     </View>
 
 
-{/*************************************** Description  ******************************************/}
 
                     <View style={styles.headingContainer} >
                         <Text style={styles.heading} >Description</Text>
@@ -167,23 +215,22 @@ class EditTrip extends React.Component {
                             multiline 
                             placeholder="Add Description of Trip" 
                             onChangeText={(description)=>this.setState({description:description})}
+                            defaultValue={this.state.description}
                         />
                     </View>
 
 
-{/*************************************** Start and End Date  **************************************/}
 
                     <View style={styles.headingContainer} >
                         <Text style={styles.heading} >Start Date - End Date</Text>
                     </View>
                     <View style={styles.pickers} >
-                        <StyledDatePicker onChangeDate={this.selectStartDate} />
+                        <StyledDatePicker defaultDate={new Date(this.state.start_date)} onChangeDate={this.selectStartDate} />
                         <Text style={{paddingHorizontal:17}} >-</Text>
-                        <StyledDatePicker onChangeDate={this.selectEndDate} />
+                        <StyledDatePicker defaultDate={new Date(this.state.end_date)} onChangeDate={this.selectEndDate} />
                     </View>
 
 
-{/*************************************** Price ******************************************/}
 
                     <View style={styles.headingContainer} >
                         <Text style={styles.heading} >Price (per person)</Text>
@@ -195,11 +242,11 @@ class EditTrip extends React.Component {
                         keyboardType="numeric" 
                         maxLength={6} 
                         onChangeText={(price)=>this.setState({price:price})}
+                        defaultValue={`${this.state.price}`}
                         />
                     </View>
 
 
-{/*************************************** Capacity ******************************************/}
 
 <View style={styles.headingContainer} >
                         <Text style={styles.heading} >Capacity</Text>
@@ -210,13 +257,13 @@ class EditTrip extends React.Component {
                         placeholder="Capacity" 
                         keyboardType="numeric" 
                         maxLength={6} 
-                        onChangeText={(price)=>this.setState({capacity:capacity})}
+                        onChangeText={(capacity)=>this.setState({capacity:capacity})}
+                        defaultValue={`${this.state.capacity}`}
                         />
                     </View>
 
 
 
-{/*************************************** Discount  ******************************************/}
                     <View style={styles.headingContainer} >
                         <Text style={styles.heading} >Discount (%) </Text>
                     </View>
@@ -227,11 +274,11 @@ class EditTrip extends React.Component {
                             keyboardType="numeric" 
                             maxLength={2} 
                             onChangeText={(discount)=>this.setState({discount:discount})}
+                            defaultValue={`${this.state.discount}`}
                         />
                     </View>
 
 
-{/*************************************** Food  ******************************************/}
 
                     <View style={styles.headingContainer} >
                         <Text style={styles.heading} >Food </Text>
@@ -263,8 +310,6 @@ class EditTrip extends React.Component {
                         </View>
                         
 
-{/*************************************** Accomodation  ******************************************/}
-
                     </View>
                     <View style={styles.headingContainer} >
                         <Text style={styles.heading} >Accomodation </Text>
@@ -275,11 +320,10 @@ class EditTrip extends React.Component {
                             multiline 
                             placeholder="Add Accomodation Details; hotel name etc" 
                             onChangeText={(accomodation)=>this.setState({accomodation:accomodation})}
+                            defaultValue={this.state.accomodation}
                             />
                     </View>
 
-
-{/*************************************** Conveyance  ******************************************/}
 
 
                     <View style={styles.headingContainer} >
@@ -291,24 +335,21 @@ class EditTrip extends React.Component {
                             multiline 
                             placeholder="Add Conveyance Details" 
                             onChangeText={(conveyance)=>this.setState({conveyance:conveyance})}
+                            defaultValue={this.state.conveyance}
                             />
                     </View>
 
 
-
-{/*************************************** Gender Spec  ******************************************/}
 
 
                     <View style={styles.headingContainer} >
                         <Text style={styles.heading} >Gender Specification </Text>
                     </View>
                     <View style={styles.pickers} >
-                        <StyledPicker width={250} title="Gender" select={this.selectGender} options={this.state.genderOption} />
+                        <StyledPicker width={250} defaultValue={this.state.gender} title="Gender" select={this.selectGender} options={this.state.genderOption} />
                     </View>
 
 
-
-{/*************************************** Pickup Point  ******************************************/}
 
                     <View style={styles.headingContainer} >
                         <Text style={styles.heading} >Pickup point </Text>
@@ -319,12 +360,11 @@ class EditTrip extends React.Component {
                             multiline 
                             placeholder="Add Pickup Details" 
                             onChangeText={(pickup)=>this.setState({pickup:pickup})}
+                            defaultValue={this.state.pickup}
                             />
                     </View>
 
 
-
-{/*************************************** Schedule  ******************************************/}
 
                     <View style={styles.headingContainer} >
                         <Text style={styles.heading} >Schedule </Text>
@@ -347,17 +387,15 @@ class EditTrip extends React.Component {
 
 
 
-{/*************************************** Add trip ******************************************/}
-
                    <View style={{paddingVertical:100}} >
                         <StyledButton 
                             loading={this.state.isLoading}
-                            title="Add Trip" 
+                            title="Edit Trip" 
                             roundEdged
                             fontSize={20}
                             height={50}
                             width={150}
-                            onPress={this.addTrip}
+                            onPress={this.editTrip}
                             />
                    </View>
                 <AddSchedule visible={this.state.isScheduleModalOpen} closeScheduleModal={this.closeScheduleModal} />

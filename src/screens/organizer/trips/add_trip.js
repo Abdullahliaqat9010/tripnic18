@@ -45,7 +45,6 @@ class AddTrip extends React.Component {
                 "Not specified",
                 "Male",
                 "Female",
-                "Other"
             ],
             toOptions:[
                 "Not specified",
@@ -66,6 +65,11 @@ class AddTrip extends React.Component {
             this.setState({isLoading:true})
             await addNewTrip(this.state)
             this.setState({isLoading:false})
+            this.setState({msg:"successfully added trip"},()=>{
+                this.setState({toggleToast:true},()=>{
+                  this.setState({toggleToast:false})
+                })
+              })
             this.props.navigation.goBack()
         } catch (error) {
             this.setState({isLoading:false})
@@ -84,10 +88,8 @@ class AddTrip extends React.Component {
         this.setState({isScheduleModalOpen:true})
     }
     selectImage = ()=>{        
-        const options = {
-            allowsEditing:true
-        }
-        ImagePicker.launchImageLibrary(options,async (response) => {
+        
+        ImagePicker.launchImageLibrary({},async (response) => {
             // Same code as in above section!
             if (response.didCancel) {
                 console.log('User cancelled image picker');

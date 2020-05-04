@@ -16,11 +16,10 @@ const formatDate = (_date)=>{
     return formatedDate
 }
 
-const StyledDatePicker = ({onChangeDate})=>{
-    const [date, setDate] = useState(new Date());
+const StyledDatePicker = ({onChangeDate,defaultDate})=>{
+    const [date, setDate] = useState(defaultDate?new Date(defaultDate):new Date());
     const [readableDate,setReadableDate] = useState(formatDate(date))
     const [show, setShow] = useState(false);
-
     const onChange = (event, selectedDate) => {
         //console.log(selectedDate)
         setShow(false)
@@ -35,6 +34,11 @@ const StyledDatePicker = ({onChangeDate})=>{
         setShow(true)
     }
 
+    React.useEffect(()=>{
+        if(defaultDate){
+            setDate(defaultDate)
+        }
+    },[defaultDate])
   return(
     <View>
     <View>
@@ -154,7 +158,7 @@ const StyledButton = ({roundEdged,rounded,flat,width,fontSize,height,backgroundC
 }
 
 
-const StyledTextInput = ({width,height,password,isValid,placeholder,onChangeText,keyboardType,maxLength,fontSize})=>{
+const StyledTextInput = ({width,height,password,isValid,placeholder,onChangeText,keyboardType,maxLength,fontSize,defaultValue})=>{
     
     const [showPassword,setPasswordVisibility] = React.useState(!password) 
 
@@ -170,6 +174,7 @@ const StyledTextInput = ({width,height,password,isValid,placeholder,onChangeText
             alignItems:"center"
         }} >
             <TextInput 
+                defaultValue={defaultValue}
                 maxLength={maxLength?maxLength:100}
                 keyboardType={keyboardType?keyboardType:"default"}
                 secureTextEntry={!showPassword} 
@@ -224,7 +229,12 @@ const OTPInput = ({onChangeText})=>{
 }
 
 const CustomePicker = (props)=>{
-    const [selectedValue,setSelectedValue] = React.useState("Not Specified")
+    const [selectedValue,setSelectedValue] = React.useState(props.defaultValue?props.defaultValue:"Not Specified")
+    React.useEffect(()=>{
+        if(props.defaultValue){
+            setSelectedValue(props.defaultValue)
+        }
+    },[props.defaultValue])
     return(
       <Picker
           mode="modal"
@@ -244,7 +254,7 @@ const CustomePicker = (props)=>{
     )
   }
 
-const StyledPicker = ({width,options,select,title})=>{
+const StyledPicker = ({width,options,select,title,defaultValue})=>{
     return(
         <View style={{
             width:width,
@@ -265,7 +275,7 @@ const StyledPicker = ({width,options,select,title})=>{
                 }} >{title}</Text>
             </View>
             <View style={{flex:1,alignItems:"flex-end"}} >
-                <CustomePicker options={options} select={select} />
+                <CustomePicker options={options} select={select} defaultValue={defaultValue} />
             </View>
         </View>
     )
