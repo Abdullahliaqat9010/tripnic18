@@ -11,14 +11,11 @@ export default class TripsMain extends React.Component{
     constructor(props){
         super(props)
         this.state={
-            visible:false
+           
         }
     }
 
-    closeAddTripModal = ()=>{
-        this.setState({visible:false})
-    }
-
+    
     render(){
         return(
             <View style={{flex:1,alignItems:"center",justifyContent:"center"}}>
@@ -28,10 +25,9 @@ export default class TripsMain extends React.Component{
                     style={styles.fab}
                     icon="plus"
                     color="white"
-                    onPress={() => this.setState({visible:true})}
+                    onPress={() => this.props.navigation.navigate("Add Trip")}
                 />
                 
-                <AddTrip visible={this.state.visible} close = {this.closeAddTripModal} />
             </View>
         )
     }
