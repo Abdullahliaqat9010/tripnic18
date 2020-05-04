@@ -5,6 +5,7 @@ import { store } from '../../../redux/store'
 import { signout } from '../../../redux/actions/auth_actions'
 import {Toast} from '../../../components/styled_components'
 import moment from "moment";
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 const DATA = [
     {
@@ -12,8 +13,6 @@ const DATA = [
       Topic: 'Trip to Kashmir',
       NewNotification : false,
       Company_name: 'Travelia',
-      description1: 'Pack you bags and have a safe trip.',
-      description2 : 'invited you for their'
 
     },
     {
@@ -21,8 +20,6 @@ const DATA = [
         Topic: 'Trip to Swat',
         NewNotification : false,
         Company_name: 'Alpine Travels',
-        description1: 'Pack you bags and have a safe trip.',
-        description2 : 'invited you for their'
   
       },
     {
@@ -30,24 +27,19 @@ const DATA = [
         Topic: 'Trip to Kaghan',
         NewNotification : false,
         Company_name: 'LAS',
-        description1: 'Pack you bags and have a safe trip.',
-        description2 : 'invited you for their'
     },
     { 
         LatestTime: moment().subtract(25, 'months'),
         Topic: 'Trip to Chitral',
         NewNotification : false,
         Company_name: 'LCS',  
-        description1: 'Pack you bags and have a safe trip.',
-        description2 : 'invited you for their'
+       
     },
     {
         LatestTime: moment().subtract(7, 'minute'),
         Topic: 'Trip to Muree',
         NewNotification : false,
         Company_name: 'Trip maro',
-        description1: 'Pack you bags and have a safe trip.',
-        description2 : 'invited you for their'
     },
   ];
   var enableEarlier = true
@@ -62,10 +54,11 @@ const DATA = [
         enableEarlier = false
         return (
             <View>
-            <View style = {{fontSize: 10, Font : 'Bold', marginTop : 3, marginBottom:3,}}>
+            <View style = {{fontSize: 10, Font : 'Bold', marginTop : 1, marginBottom:1, paddingLeft:10}}>
             <Text>Earlier</Text>
            </View>
-          <View style={{Font : 15,  padding: 20, marginVertical: 8, marginHorizontal: 16, flexDirection : 'row'}}>
+           <TouchableOpacity>
+          <View style={{Font : 15,  padding: 5, marginVertical: 0, marginHorizontal: 16,paddingRight:10 , flexDirection : 'row',}}>
             <View style = {{ width: 52,
               height: 52,
               borderRadius: 26,
@@ -77,16 +70,18 @@ const DATA = [
             </View>
             <View >  
             <Text style={styles.title}>{DataItem.Topic}</Text>
-            <Text style = {{paddingLeft:20, paddingRight :20}}> {DataItem.description1} {DataItem.Company_name} {DataItem.description2} {DataItem.Topic} </Text> 
+            <Text numberOfLines = {3} style = {{paddingLeft:20, paddingRight :20}}>Pack your bags and have a safe trip. {DataItem.Company_name} accepted your request for {DataItem.Topic}.</Text> 
             <Text style = {{paddingLeft:20}}> {duration}</Text>
             </View>
           </View>
+          </TouchableOpacity>
           </View>
         );
     }
     
     return (
-      <View style={{Font : 15,  padding: 20, marginVertical: 8, marginHorizontal: 16, flexDirection : 'row'}}>
+        <TouchableOpacity>
+      <View style={{Font : 15,  padding: 5, marginVertical: 0, marginHorizontal: 16, paddingRight:10, flexDirection : 'row'}}>
         <View style = {{ width: 52,
           height: 52,
           borderRadius: 26,
@@ -98,10 +93,11 @@ const DATA = [
         </View>
         <View >  
         <Text style={styles.title}>{DataItem.Topic}</Text>
-        <Text style = {{paddingLeft:20}}> {DataItem.description1} {DataItem.Company_name} {DataItem.description2} {DataItem.Topic} </Text> 
+        <Text numberOfLines={3} style = {{paddingLeft:20, paddingRight:20}}>Pack your bags and have a safe trip. {DataItem.Company_name} accepted your request for {DataItem.Topic}.</Text> 
         <Text style = {{paddingLeft:20}}> {duration}</Text>
         </View>
       </View>
+      </TouchableOpacity>
     );
   }
   function sortByNum(a, b) {
@@ -139,7 +135,7 @@ export default class NotificationMain extends React.Component{
 			this.setState({enabled:false }); }}
 			onMomentumScrollEnd={(e) => { this.setState({ enabled:true }); }}
 			onScrollEndDrag={(e) => { this.setState({ enabled:true }); }} >
-            <View style = {{fontSize: 10, Font : 'Bold', marginTop : 3, marginBottom:3,}}>
+            <View style = {{fontSize: 10, Font : 'Bold', marginTop : 1, marginBottom:1, paddingLeft:10}}>
              <Text>Today</Text>
             </View>
             <FlatList 

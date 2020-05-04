@@ -27,7 +27,7 @@ const ChooseAppMode = ({isOrganizer,isLoggedIn}) => {
             }
         }
         else{
-            return <AppAuthStack/>
+            return <OrganizerMainAppScreens/>
         }
     }
 }

@@ -5,6 +5,7 @@ import { store } from '../../../redux/store'
 import { signout } from '../../../redux/actions/auth_actions'
 import {Toast} from '../../../components/styled_components'
 import moment from "moment";
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 const DATA = [
     {
@@ -48,9 +49,11 @@ const DATA = [
         return (
             <View>
             <View style = {{fontSize: 10, Font : 'Bold', marginTop : 3, marginBottom:3,}}>
-            <Text>Earlier</Text>
+            <Text style = {{paddingLeft : 10}}>Earlier</Text>
            </View>
-          <View style={{Font : 15,  padding: 20, marginVertical: 8, marginHorizontal: 16, flexDirection : 'row'}}>
+           <TouchableOpacity>
+          <View style={{Font : 15,  padding: 5, paddingRight:10, marginVertical: 8, marginHorizontal: 16, flexDirection : 'row', paddingRight:10}}>
+           
             <View style = {{ width: 52,
               height: 52,
               borderRadius: 26,
@@ -66,12 +69,15 @@ const DATA = [
             <Text style = {{paddingLeft:20}}> {duration}</Text>
             </View>
           </View>
+          </TouchableOpacity>
           </View>
+
         );
     }
     
     return (
-      <View style={{Font : 15,  padding: 20, marginVertical: 8, marginHorizontal: 16, flexDirection : 'row'}}>
+        <TouchableOpacity>
+      <View style={{Font : 15,  padding: 5,paddingRight:10, marginVertical: 8, marginHorizontal: 16, flexDirection : 'row', paddingRight:10}}>
         <View style = {{ width: 52,
           height: 52,
           borderRadius: 26,
@@ -87,6 +93,7 @@ const DATA = [
         <Text style = {{paddingLeft:20}}> {duration}</Text>
         </View>
       </View>
+      </TouchableOpacity>
     );
   }
   function sortByNum(a, b) {
@@ -125,7 +132,7 @@ export default class NotificationMain extends React.Component{
 			onMomentumScrollEnd={(e) => { this.setState({ enabled:true }); }}
 			onScrollEndDrag={(e) => { this.setState({ enabled:true }); }} >
             <View style = {{fontSize: 10, Font : 'Bold', marginTop : 3, marginBottom:3,}}>
-             <Text>Today</Text>
+             <Text style = {{paddingLeft : 10}}>Today</Text>
             </View>
             <FlatList 
              
