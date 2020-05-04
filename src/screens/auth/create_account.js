@@ -1,5 +1,5 @@
 import React,{useState,useCallback,useEffect} from 'react';
-import {StyleSheet,View,Dimensions,TextInput,BackHandler,Text,Alert} from 'react-native';
+import {StyleSheet,View,Dimensions,TextInput,BackHandler,Text,Alert,StatusBar} from 'react-native';
 import {Picker} from '@react-native-community/picker'
 import { connect } from 'react-redux';
 import {store} from '../../redux/store';
@@ -127,7 +127,7 @@ const CreateAccount = (props) => {
    }
     return (
       <>
-        {/* <StatusBar translucent backgroundColor="transparent" /> */}
+        <StatusBar barStyle="dark-content" translucent={false} />
         <View style={styles.container} >
           <View style={styles.iconLeft} >
           </View>
