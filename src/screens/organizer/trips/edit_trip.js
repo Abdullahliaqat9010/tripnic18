@@ -166,7 +166,7 @@ class EditTrip extends React.Component {
         if(this.state.isFetchingDetails){
             return(
                 <View style={{flex:1,alignItems:"center",justifyContent:"center"}} >
-                    <ProgressBarAndroid/>
+                    <ProgressBarAndroid color="#2F9AE3"/>
                 </View>
             )
         }

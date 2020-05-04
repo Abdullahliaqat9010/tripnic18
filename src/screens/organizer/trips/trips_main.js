@@ -11,9 +11,12 @@ const {width} = Dimensions.get("window")
 
 
 
-const TripCard = ({trip,navigateToEditTrip,deleteTrip})=>{
+const TripCard = ({trip,navigateToEditTrip,deleteTrip,navigateToPreviewTrip})=>{
     return(
         <TouchableOpacity 
+            onPress={()=>{
+                navigateToPreviewTrip(trip.id)
+            }}
             onLongPress={()=>{
                 Alert.alert('','Edit or Delete this trip',[
                     {
@@ -70,6 +73,12 @@ const TripCard = ({trip,navigateToEditTrip,deleteTrip})=>{
                     <Icon name="ios-pricetag" size={15} />
                     <Text style={{marginLeft:5}} >{'Rs '+trip.price}</Text>
                 </View>
+                {   trip.discount > 0 &&
+                    <View style={{flexDirection:"row",borderRadius:5,alignItems:"center",justifyContent:"center",marginBottom:5,backgroundColor:"#2F9AE3"}} >
+                        <Icon name="md-flame" size={15} color="white" />
+                        <Text style={{marginLeft:5,color:"white"}} >{trip.discount+'% off'}</Text>
+                    </View>
+                }
             </View>
         </TouchableOpacity>
     )
@@ -88,6 +97,9 @@ export default class TripsMain extends React.Component{
 
     navigateToEditTrip = (id)=>{
         this.props.navigation.navigate("Edit Trip",{id:id})
+    }
+    navigateToPreviewTrip = (id)=>{
+        this.props.navigation.navigate("Preview",{id:id})
     }
     deleteTrip = async (id)=>{
         try {
@@ -148,7 +160,7 @@ export default class TripsMain extends React.Component{
             {    
             this.state.loading?
                 <View style={{flex:1,alignItems:"center",justifyContent:"center"}} >
-                    <ProgressBarAndroid/>
+                    <ProgressBarAndroid color="#2F9AE3" />
                 </View>
                 :
                 <FlatList
@@ -168,7 +180,7 @@ export default class TripsMain extends React.Component{
                     // }}
                     ListFooterComponent={()=>{
                         return(
-                            <View style={{height:50}} />
+                            <View style={{height:100}} />
                         )
                     }}
                     onEndReachedThreshold={0.1}
@@ -188,6 +200,7 @@ export default class TripsMain extends React.Component{
                                 trip={item.item}
                                 navigateToEditTrip={this.navigateToEditTrip} 
                                 deleteTrip = {this.deleteTrip}
+                                navigateToPreviewTrip = {this.navigateToPreviewTrip}
                             />
                         )
                     }}
