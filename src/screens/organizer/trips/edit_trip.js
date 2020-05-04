@@ -11,7 +11,7 @@ import {validateTripInfo} from '../../../components/validations'
 
 const {width} = Dimensions.get('window')
 
-class AddTrip extends React.Component {
+class EditTrip extends React.Component {
     constructor(props){
         super(props)
         this.state = {
@@ -210,7 +210,7 @@ class AddTrip extends React.Component {
                         placeholder="Capacity" 
                         keyboardType="numeric" 
                         maxLength={6} 
-                        onChangeText={(capacity)=>this.setState({capacity:capacity})}
+                        onChangeText={(price)=>this.setState({capacity:capacity})}
                         />
                     </View>
 
@@ -370,9 +370,7 @@ class AddTrip extends React.Component {
     }
 } 
 
-
-
-export default AddTrip
+export default EditTrip
 
 const styles = StyleSheet.create({
     title:{

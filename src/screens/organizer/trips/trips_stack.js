@@ -2,6 +2,7 @@ import * as React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import TripsMain from './trips_main'
 import AddTrip from './add_trip'
+import EditTrip from './edit_trip'
 import AddSchedule from './add_schedule'
 
 const Stack = createStackNavigator()
@@ -17,6 +18,13 @@ const TripsStack = ({navigation,route})=>{
         <Stack.Navigator >
             <Stack.Screen name="My Trips" component={TripsMain}/>
             <Stack.Screen name="Add Trip" component={AddTrip}
+                options={{
+                    headerTitleContainerStyle: {
+                        left: 50,
+                    },
+                }}
+            />
+            <Stack.Screen name="Edit Trip" component={EditTrip}
                 options={{
                     headerTitleContainerStyle: {
                         left: 50,
