@@ -140,7 +140,7 @@ class AddTrip extends React.Component {
 {/*************************************** Title  ******************************************/}
 
                     <View style={styles.container} >
-                        <TextInput style={styles.title} multiline maxLength={100} placeholder="Add Title" 
+                        <TextInput style={styles.title} multiline maxLength={30} placeholder="Add Title" 
                             onChangeText={(title)=>this.setState({title:title})}
                         ></TextInput>
                     </View>
