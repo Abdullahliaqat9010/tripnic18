@@ -113,7 +113,7 @@ googleLogin = async()=>{
                   }
                 </Text>
               </View>
-                <View style={{marginBottom:-25}}>
+                <View style={{marginBottom:-15}}>
                   <StyledButton 
                     roundEdged 
                     backgroundColor="white" 
