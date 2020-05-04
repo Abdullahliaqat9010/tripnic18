@@ -7,9 +7,6 @@ import {Picker} from '@react-native-community/picker'
 import DateTimePicker from '@react-native-community/datetimepicker'
 
 
-const StyledTimePicker = ({changeDate})=>{
-
-}
 
 const formatDate = (_date)=>{
     const day = _date.getDate()
@@ -59,6 +56,7 @@ const StyledDatePicker = ({onChangeDate})=>{
         mode='date'
         display="default"
         onChange={onChange}
+        minimumDate={new Date()}
       />
     )}
   </View>

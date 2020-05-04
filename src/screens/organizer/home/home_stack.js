@@ -5,9 +5,15 @@ import Home from './home'
 import Settings from './settings'
 const Stack = createStackNavigator()
 
-const HomeStack = ()=>{
+const HomeStack = ({route,navigation})=>{
+    if(route.state && route.state.index > 0){
+        navigation.setOptions({tabBarVisible:false})
+    }
+    else{
+        navigation.setOptions({tabBarVisible:true})
+    }
     return(
-        <Stack.Navigator>
+        <Stack.Navigator >
             <Stack.Screen name="Home" component={Home}
                 options={({navigation})=>({
                     headerRight:()=>{

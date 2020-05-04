@@ -1,22 +1,34 @@
 import React from 'react'
-import {Modal,View,ScrollView,Text,StyleSheet,Dimensions,TouchableOpacity,ImageBackground, TextInput} from 'react-native'
-const src = 'https://images.all-free-download.com/images/graphicthumb/beautiful_scenery_04_hd_pictures_166258.jpg'
-const {width} = Dimensions.get('window')
-import Icon from 'react-native-vector-icons/Ionicons'
-import {StyledDatePicker,StyledPicker,StyledTextInput, StyledButton} from '../../../components/styled_components'
+import {View,ScrollView,Text,StyleSheet,Dimensions,TouchableOpacity,Image, TextInput} from 'react-native'
+import storage from '@react-native-firebase/storage'
+import {StyledDatePicker,StyledPicker,StyledTextInput, StyledButton,Toast} from '../../../components/styled_components'
 import CheckBox from '@react-native-community/checkbox';
+import {addNewTrip} from '../../../redux/actions/app_actions'
+import ImagePicker from 'react-native-image-picker'
+import AddSchedule from './add_schedule'
+import Loading from '../../common/loading'
+import {validateTripInfo} from '../../../components/validations'
 
+const {width} = Dimensions.get('window')
 
 class AddTrip extends React.Component {
     constructor(props){
         super(props)
         this.state = {
+            isLoading:false,
+            toggleToast:false,
+            msg:"",
+            isScheduleModalOpen:false,
+            src:"",
+            path:"",
+            filename:"",
+            capacity:0,
             title:"",
             to:"",
             from:"",
             description:"",
-            start_date:"",
-            end_date:"",
+            start_date:null,
+            end_date:null,
             price:0,
             discount:0,
             food:{
@@ -36,18 +48,57 @@ class AddTrip extends React.Component {
                 "Other"
             ],
             toOptions:[
+                "Not specified",
                 "lahore",
                 "Karachi"
             ],
             fromOptions:[
+                "Not specified",
                 "lahore",
                 "Karachi"
             ]
         }
     }
 
+    addTrip = async()=>{
+        try {
+            validateTripInfo(this.state)
+            this.setState({isLoading:true})
+            await addNewTrip(this.state)
+            this.setState({isLoading:false})
+            this.props.navigation.goBack()
+        } catch (error) {
+            this.setState({isLoading:false})
+            this.setState({msg:error},()=>{
+              this.setState({toggleToast:true},()=>{
+                this.setState({toggleToast:false})
+              })
+            })
+        }
+    }
+
+    closeScheduleModal = ()=>{
+        this.setState({isScheduleModalOpen:false})
+    }
+    openScheduleModal = ()=>{
+        this.setState({isScheduleModalOpen:true})
+    }
+    selectImage = ()=>{        
+        const options = {
+            allowsEditing:true
+        }
+        ImagePicker.launchImageLibrary(options,async (response) => {
+            // Same code as in above section!
+            if (response.didCancel) {
+                console.log('User cancelled image picker');
+              } else if (response.error) {
+                console.log('ImagePicker Error: ', response.error);
+              } else {
+                this.setState({src:response.uri,path:response.path,filename:response.fileName})
+              }
+        });
+    }
     selectTo = (to)=>{
-        console.log(to)
         this.setState({to:to})
     }
 
@@ -70,24 +121,28 @@ class AddTrip extends React.Component {
     render(){
         return(
             
-            <Modal visible={this.props.visible} animated animationType="fade" onRequestClose={()=>{this.props.close()}} > 
-                
-                <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{alignItems:"center",justifyContent:"flex-start"}} >    
+                            
+                <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{backgroundColor:"white",alignItems:"center",justifyContent:"flex-start"}} >    
                     
-                    <ImageBackground style={{width:width,height:200}} source={{uri:src}} >
-                        <Icon 
-                            style={{paddingLeft:15,paddingTop:15}} 
-                            name="ios-close-circle" 
-                            size={30} 
-                            color="white" 
-                            onPress={()=>this.props.close()}
+                    <TouchableOpacity
+                        onPress={this.selectImage}
+                        activeOpacity={0.9}
+                    >
+                        <Image style={{width:width,height:250}} source={
+                            this.state.src?{uri:this.state.src}:
+                            require('../../../assets/image_upload_placeholder.png')
+                            } 
                         />
-                    </ImageBackground>
+                            
+                        
+                    </TouchableOpacity>
 
 {/*************************************** Title  ******************************************/}
 
                     <View style={styles.container} >
-                        <TextInput style={styles.title} placeholder="Add Title" ></TextInput>
+                        <TextInput style={styles.title} multiline maxLength={100} placeholder="Add Title" 
+                            onChangeText={(title)=>this.setState({title:title})}
+                        ></TextInput>
                     </View>
 
 
@@ -110,7 +165,9 @@ class AddTrip extends React.Component {
                         <TextInput style={styles.inputMultiline}
                             maxLength={500}
                             multiline 
-                            placeholder="Add Description of Trip" />
+                            placeholder="Add Description of Trip" 
+                            onChangeText={(description)=>this.setState({description:description})}
+                        />
                     </View>
 
 
@@ -129,11 +186,34 @@ class AddTrip extends React.Component {
 {/*************************************** Price ******************************************/}
 
                     <View style={styles.headingContainer} >
-                        <Text style={styles.heading} >Price</Text>
+                        <Text style={styles.heading} >Price (per person)</Text>
                     </View>
                     <View style={styles.pickers} >
-                        <StyledTextInput width={150} placeholder="Price in Rupees" keyboardType="numeric" maxLength={6} />
+                        <StyledTextInput 
+                        width={150} 
+                        placeholder="Price in Rupees" 
+                        keyboardType="numeric" 
+                        maxLength={6} 
+                        onChangeText={(price)=>this.setState({price:price})}
+                        />
                     </View>
+
+
+{/*************************************** Capacity ******************************************/}
+
+<View style={styles.headingContainer} >
+                        <Text style={styles.heading} >Capacity</Text>
+                    </View>
+                    <View style={styles.pickers} >
+                        <StyledTextInput 
+                        width={150} 
+                        placeholder="Capacity" 
+                        keyboardType="numeric" 
+                        maxLength={6} 
+                        onChangeText={(price)=>this.setState({capacity:capacity})}
+                        />
+                    </View>
+
 
 
 {/*************************************** Discount  ******************************************/}
@@ -141,7 +221,13 @@ class AddTrip extends React.Component {
                         <Text style={styles.heading} >Discount (%) </Text>
                     </View>
                     <View style={styles.pickers} >
-                        <StyledTextInput width={150} placeholder="Discount in %" keyboardType="numeric" maxLength={2} />
+                        <StyledTextInput 
+                            width={150} 
+                            placeholder="Discount in %" 
+                            keyboardType="numeric" 
+                            maxLength={2} 
+                            onChangeText={(discount)=>this.setState({discount:discount})}
+                        />
                     </View>
 
 
@@ -187,7 +273,9 @@ class AddTrip extends React.Component {
                         <TextInput style={styles.inputMultiline}
                             maxLength={500}
                             multiline 
-                            placeholder="Add Accomodation Details; hotel name etc" />
+                            placeholder="Add Accomodation Details; hotel name etc" 
+                            onChangeText={(accomodation)=>this.setState({accomodation:accomodation})}
+                            />
                     </View>
 
 
@@ -201,7 +289,9 @@ class AddTrip extends React.Component {
                         <TextInput style={styles.inputMultiline}
                             maxLength={500}
                             multiline 
-                            placeholder="Add Conveyance Details" />
+                            placeholder="Add Conveyance Details" 
+                            onChangeText={(conveyance)=>this.setState({conveyance:conveyance})}
+                            />
                     </View>
 
 
@@ -227,7 +317,9 @@ class AddTrip extends React.Component {
                         <TextInput style={styles.inputMultiline}
                             maxLength={500}
                             multiline 
-                            placeholder="Add Pickup Details" />
+                            placeholder="Add Pickup Details" 
+                            onChangeText={(pickup)=>this.setState({pickup:pickup})}
+                            />
                     </View>
 
 
@@ -246,7 +338,9 @@ class AddTrip extends React.Component {
                                 justifyContent:"center",
                                 borderRadius:10,
                                 borderColor:"#A7A5A5"
-                            }}>
+                            }}
+                            onPress={this.openScheduleModal}
+                            >
                             <Text style={{fontSize:15,color:"#A7A5A5"}} >Add Schedule</Text>
                         </TouchableOpacity>
                     </View>
@@ -257,19 +351,20 @@ class AddTrip extends React.Component {
 
                    <View style={{paddingVertical:100}} >
                         <StyledButton 
+                            loading={this.state.isLoading}
                             title="Add Trip" 
                             roundEdged
                             fontSize={20}
                             height={50}
                             width={150}
-                            onPress={()=>{
-                                console.log(this.state)
-                            }}
+                            onPress={this.addTrip}
                             />
                    </View>
-
+                <AddSchedule visible={this.state.isScheduleModalOpen} closeScheduleModal={this.closeScheduleModal} />
+                <Toast message={this.state.msg} visible={this.state.toggleToast} />
+                <Loading visible={this.state.isLoading} />
                 </ScrollView>
-            </Modal>
+
         )
 
     }
@@ -283,19 +378,18 @@ const styles = StyleSheet.create({
     title:{
         fontSize:35,
         fontWeight:"bold",
-        paddingHorizontal:10,
-        flex:1,
+        paddingHorizontal:20,
+        width:width,
+
     },
     heading:{
         fontSize:20,
         fontWeight:"bold",
     },
     container:{
-        width:width,
         flexDirection:"row",
         justifyContent:"flex-start",
         paddingVertical:5,
-        paddingHorizontal:10,
         alignItems:"center",
         
     },
@@ -343,8 +437,8 @@ const styles = StyleSheet.create({
         justifyContent:"center"
     },
     text:{
-        fontSize:18,
-        color:"grey"
+        fontSize:15,
+        color:"black"
     },
     checkBox:{
         width:width,
