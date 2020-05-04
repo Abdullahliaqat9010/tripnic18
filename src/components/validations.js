@@ -41,4 +41,44 @@ const validateCompanyInfo = (companyName,about) =>{
     }
 }
 
-export {validateEmail,validateCreateUserForm,validatePhoneNumber,validatePhoneCode,validateCompanyInfo}
+const validateTripInfo = (trip) => {
+    
+    if(trip.start_date === null){
+        throw "You must select a starting date for trip"
+    }
+    if(trip.end_date === null){
+        throw "You must select a starting date for trip"
+    }
+    const date1 = new Date(trip.start_date)
+    const date2 = new Date(trip.end_date)
+    date2.setHours(0,0,0,0)
+    date1.setHours(0,0,0,0)
+    console.log(date1.getTime() > date2.getTime())
+    if(date1.getTime() > date2.getTime()){
+        throw "Start date cannot come after End date."
+    }
+    if(trip.title === ""){
+        throw "You must enter a title for trip"
+    }
+    if(trip.path === ""){
+        throw "Select at least one image for trip thumbnail"
+    }
+    if(trip.to === "Not specified"){
+        throw "Select destination of trip"
+    }
+    if(trip.from === "Not specified"){
+        throw "Please specify the starting point of trip"
+    }
+    if(trip.description === ""){
+        throw "Please add description of trip"
+    }
+    if(trip.price === 0){
+        throw "Please add price of your trip"
+    }
+    if(trip.capacity === 0){
+        throw "Please specify a capacity greater than zero"
+    }
+   
+}
+
+export {validateTripInfo,validateEmail,validateCreateUserForm,validatePhoneNumber,validatePhoneCode,validateCompanyInfo}
