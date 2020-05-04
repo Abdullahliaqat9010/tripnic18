@@ -37,4 +37,23 @@ const addNewTrip = (trip)=>{
   })
 }
 
-export {addNewTrip}
+const fetchTrips = ()=>{
+  return new Promise((res,rej)=>{
+    try {
+      auth().onAuthStateChanged(async(user)=>{
+        if(user){
+          const tripRef = firestore().collection('trips').where('host','==',user.uid).limit(10)
+          const snapshot = await tripRef.get()
+          res(snapshot.docs.map((doc)=>({...doc.data(),id:doc.id})))    
+        }
+        else{
+          rej("You are not authorized here")
+        }
+      })
+    } catch (error) {
+      rej(error.message)
+    }
+  })
+}
+
+export {addNewTrip,fetchTrips}

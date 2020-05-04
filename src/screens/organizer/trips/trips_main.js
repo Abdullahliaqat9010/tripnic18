@@ -5,34 +5,35 @@ import { signout } from '../../../redux/actions/auth_actions'
 import {FAB} from 'react-native-paper'
 import AddTrip from './add_trip'
 import Icon from 'react-native-vector-icons/Ionicons'
+import {fetchTrips} from '../../../redux/actions/app_actions'
+import {ProgressBarAndroid} from '@react-native-community/progress-bar-android'
 const {width} = Dimensions.get("window")
 
 
-const TripCard = ({trip})=>{
+
+const TripCard = ({trip,navigateToEditTrip,deleteTrip})=>{
     return(
         <TouchableOpacity 
             onLongPress={()=>{
                 Alert.alert('','Edit or Delete this trip',[
                     {
                         text:"Edit",
-                        onPress:()=>{console.log("Edit")}
+                        onPress:()=>{
+                            navigateToEditTrip(trip.id)
+                        }
                     },
                     {
                         text:"Delete",
                         onPress:()=>{
-                            console.log("Delete")
                             Alert.alert('','Are you sure you want to delete?',[
                                 {
                                     text:"Yes",
                                     onPress:()=>{
-                                        console.log("yes")
+                                        deleteTrip(trip.id)
                                     }
                                 },
                                 {
                                     text:"No",
-                                    onPress:()=>{
-                                        console.log("No")
-                                    }
                                 }
                             ])
                         }
@@ -79,57 +80,46 @@ export default class TripsMain extends React.Component{
         super(props)
         this.state={
             refreshing:false,
+            loading:false,
            data:[
-               {
-                id:"1",   
-                title:"Trip Title to naran and Kaghan",
-                thumbnail:"https://firebasestorage.googleapis.com/v0/b/tripnic-18.appspot.com/o/02m5BVeBgi4q9bPE89g5%2FIMG-20200502-WA0023.jpg?alt=media&token=69660376-18c6-4a97-b16e-a203baceeff2",
-                discount:10,
-                price:500,
-                rating:4.5,
-                duration:10,
-                capacity:4
-                },
-                {
-                id:"2",    
-                title:"Trip Title",
-                thumbnail:"https://firebasestorage.googleapis.com/v0/b/tripnic-18.appspot.com/o/02m5BVeBgi4q9bPE89g5%2FIMG-20200502-WA0023.jpg?alt=media&token=69660376-18c6-4a97-b16e-a203baceeff2",
-                discount:10,
-                price:500,
-                rating:4.5,
-                duration:10,
-                capacity:4
-                },
-                {
-                id:"3",    
-                title:"Trip Title",
-                thumbnail:"https://firebasestorage.googleapis.com/v0/b/tripnic-18.appspot.com/o/02m5BVeBgi4q9bPE89g5%2FIMG-20200502-WA0023.jpg?alt=media&token=69660376-18c6-4a97-b16e-a203baceeff2",
-                discount:10,
-                price:500,
-                rating:4.5,
-                duration:10,
-                capacity:4
-                },
-                {
-                id:"4",    
-                title:"Trip Title",
-                thumbnail:"https://firebasestorage.googleapis.com/v0/b/tripnic-18.appspot.com/o/02m5BVeBgi4q9bPE89g5%2FIMG-20200502-WA0023.jpg?alt=media&token=69660376-18c6-4a97-b16e-a203baceeff2",
-                discount:10,
-                price:500,
-                rating:4.5,
-                duration:10,
-                capacity:4
-                }
+               
             ]
         }
     }
 
-    
+    navigateToEditTrip = (id)=>{
+        this.props.navigation.navigate("Edit Trip")
+    }
+    deleteTrip = async (id)=>{
+        console.log("fetching")
+        await fetch('https://images.unsplash.com/photo-1500964757637-c85e8a162699?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb')
+        
+        console.log("delete trip "+id)
+    }
+    fetchTrips = async()=>{
+        const data = await fetchTrips()
+        this.setState({data:data},()=>{
+            this.setState({refreshing:false})
+        })
+    }
+
+    async componentDidMount(){
+        this.setState({loading:true})
+        await this.fetchTrips()
+        this.setState({loading:false})
+    }
+
     render(){
         return(
             <View style={{flex:1,alignItems:"center",justifyContent:"center",backgroundColor:"white"}}>
             
-               <FlatList
+            {    
+            this.state.loading?
+                <View style={{flex:1,alignItems:"center",justifyContent:"center"}} >
+                    <ProgressBarAndroid/>
+                </View>
+                :
+                <FlatList
                     style={{width:width}}
                     contentContainerStyle={{alignItems:"center"}}
                     data={this.state.data}
@@ -152,7 +142,8 @@ export default class TripsMain extends React.Component{
                     onEndReachedThreshold={0.1}
                     refreshing={this.state.refreshing}
                     onRefresh={()=>{
-                        this.setState({refreshing:false})
+                        this.setState({refreshing:true})
+                        this.fetchTrips()
                     }}
                     ItemSeparatorComponent={()=>{
                         return(
@@ -161,19 +152,22 @@ export default class TripsMain extends React.Component{
                     }}
                     renderItem={(item)=>{
                         return(
-                            <TripCard trip={item.item} />
+                            <TripCard 
+                                trip={item.item}
+                                navigateToEditTrip={this.navigateToEditTrip} 
+                                deleteTrip = {this.deleteTrip}
+                            />
                         )
                     }}
                     keyExtractor={(item)=>item.id}
-               />
-                
-                <FAB
-                    style={styles.fab}
-                    icon="plus"
-                    color="white"
-                    onPress={() => this.props.navigation.navigate("Add Trip")}
+                /> 
+                }
+            <FAB
+                style={styles.fab}
+                icon="plus"
+                color="white"
+                onPress={() => this.props.navigation.navigate("Add Trip")}
                 />
-                
             </View>
         )
     }
