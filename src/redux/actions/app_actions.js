@@ -74,7 +74,8 @@ const editTrip = (trip)=>{
         conveyance:trip.conveyance,
         gender:trip.gender,
         pickup:trip.pickup,
-        capacity:trip.capacity
+        capacity:trip.capacity,
+        schedule:trip.schedule
       })
       await batch.commit()
       res()
@@ -127,13 +128,11 @@ const deleteTrip = (id)=>{
     try {
       const docRef = firestore().collection('trips').doc(id)
       const detailsRef = firestore().collection('trips/'+id+'/more_info').doc('details')
-      const dataRef = firestore().collection('trips/'+id+'/more_info').doc('private_data')
-      const scheduleRef = firestore().collection('trips/'+id+'/more_info').doc('schedule')
+
       const batch = firestore().batch()
       batch.delete(detailsRef)
-      batch.delete(dataRef)
-      batch.delete(scheduleRef)
       batch.delete(docRef)
+
       await batch.commit()
       res()
     } catch (error) {
@@ -142,4 +141,20 @@ const deleteTrip = (id)=>{
   })
 }
 
-export {addNewTrip,fetchTrips,editTrip,fetchTripDetials,deleteTrip}
+const searchTripWithFilter = (query,filters)=>{
+  return new Promise(async(res,rej)=>{
+    let lowercase = query.toLowerCase()
+    let searchTags = lowercase.split(" ")
+    try {
+      
+      // const tripsRef = firestore().collection('trips').where('price','>','0').get()
+      const tripsRef = firestore().collection('trips').where('searchTags','array-contains-any',searchTags).get()
+      const trips = (await tripsRef).docs.map((doc)=>({...doc.data(),id:doc.id}))
+      res(trips) 
+    } catch (error) {
+      
+    }
+  })
+}
+
+export {addNewTrip,fetchTrips,editTrip,fetchTripDetials,deleteTrip,searchTripWithFilter}

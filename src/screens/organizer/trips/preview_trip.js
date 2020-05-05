@@ -34,17 +34,10 @@ class PreviewTrip extends React.Component {
             pickup:"",
             accomodation:"",
             conveyance:"",
-            schedule:{},
+            schedule:"",
         }
     }
 
-    
-    closeScheduleModal = ()=>{
-        this.setState({isScheduleModalOpen:false})
-    }
-    openScheduleModal = ()=>{
-        this.setState({isScheduleModalOpen:true})
-    }
     
     async componentDidMount(){
         this.setState({isFetchingDetails:true})
@@ -70,7 +63,7 @@ class PreviewTrip extends React.Component {
                 gender:trip.gender,
                 pickup:trip.pickup,
                 thumbnail:trip.thumbnail,
-                schedule:{...trip.schedule}
+                schedule:trip.schedule
             },()=>{
                 this.setState({isFetchingDetails:false})
             })
@@ -254,29 +247,20 @@ class PreviewTrip extends React.Component {
                     </>
                     }
 
-
-
+                    {this.state.schedule!==""&&
+                    <>
                     <View style={styles.headingContainer} >
-                        <Text style={styles.heading} >Schedule </Text>
+                        <Text style={styles.heading} >Trip Schedule </Text>
                     </View>
-                    <View style={styles.pickers} >
-                        <TouchableOpacity style={{
-                                borderWidth:1,
-                                width:135,
-                                height:50,
-                                alignItems:"center",
-                                justifyContent:"center",
-                                borderRadius:10,
-                                borderColor:"#A7A5A5"
-                            }}
-                            onPress={this.openScheduleModal}
-                            >
-                            <Text style={{fontSize:15,color:"#A7A5A5"}} >Add Schedule</Text>
-                        </TouchableOpacity>
+                    <View style={{width:width,paddingHorizontal:20}} >
+                        <Text style={{fontSize:17,color:"grey"}} >{this.state.schedule}</Text>
                     </View>
+                    </>
+                    }
+
+                    
                     <View style={{height:100}} />
 
-                <AddSchedule visible={this.state.isScheduleModalOpen} closeScheduleModal={this.closeScheduleModal} />
                 </ScrollView>
 
         )

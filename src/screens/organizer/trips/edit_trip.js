@@ -21,7 +21,6 @@ class EditTrip extends React.Component {
             isLoading:false,
             toggleToast:false,
             msg:"",
-            isScheduleModalOpen:false,
             src:"",
             path:"notSelected",
             filename:"",
@@ -44,7 +43,7 @@ class EditTrip extends React.Component {
             pickup:"",
             accomodation:"",
             conveyance:"",
-            schedule:{},
+            schedule:"",
             genderOption:[
                 "Not specified",
                 "Male",
@@ -85,12 +84,7 @@ class EditTrip extends React.Component {
         }
     }
 
-    closeScheduleModal = ()=>{
-        this.setState({isScheduleModalOpen:false})
-    }
-    openScheduleModal = ()=>{
-        this.setState({isScheduleModalOpen:true})
-    }
+
     selectImage = ()=>{        
         ImagePicker.launchImageLibrary({},async (response) => {
             // Same code as in above section!
@@ -147,7 +141,7 @@ class EditTrip extends React.Component {
                 gender:trip.gender,
                 pickup:trip.pickup,
                 thumbnail:trip.thumbnail,
-                schedule:{...trip.schedule}
+                schedule:trip.schedule
             },()=>{
                 this.setState({isFetchingDetails:false})
             })
@@ -189,7 +183,7 @@ class EditTrip extends React.Component {
 
 
                     <View style={styles.container} >
-                        <TextInput style={styles.title} multiline maxLength={30} placeholder="Add Title" 
+                        <TextInput style={styles.title} multiline maxLength={32} placeholder="Add Title" 
                             onChangeText={(title)=>this.setState({title:title})}
                             defaultValue={this.state.title}
                         ></TextInput>
@@ -364,27 +358,22 @@ class EditTrip extends React.Component {
                             />
                     </View>
 
-
-
                     <View style={styles.headingContainer} >
-                        <Text style={styles.heading} >Schedule </Text>
+                        <Text style={styles.heading} > Trip Schedule </Text>
                     </View>
-                    <View style={styles.pickers} >
-                        <TouchableOpacity style={{
-                                borderWidth:1,
-                                width:135,
-                                height:50,
-                                alignItems:"center",
-                                justifyContent:"center",
-                                borderRadius:10,
-                                borderColor:"#A7A5A5"
-                            }}
-                            onPress={this.openScheduleModal}
-                            >
-                            <Text style={{fontSize:15,color:"#A7A5A5"}} >Add Schedule</Text>
-                        </TouchableOpacity>
+                    <View style={styles.accomodationBox} >
+                        <TextInput style={styles.inputMultiline}
+                            maxLength={500}
+                            multiline 
+                            placeholder="Add Trip Schedule" 
+                            onChangeText={(schedule)=>this.setState({schedule:schedule})}
+                            defaultValue={this.state.schedule}
+                            />
                     </View>
 
+
+
+                    
 
 
                    <View style={{paddingVertical:100}} >
@@ -398,7 +387,7 @@ class EditTrip extends React.Component {
                             onPress={this.editTrip}
                             />
                    </View>
-                <AddSchedule visible={this.state.isScheduleModalOpen} closeScheduleModal={this.closeScheduleModal} />
+                
                 <Toast message={this.state.msg} visible={this.state.toggleToast} />
                 <Loading visible={this.state.isLoading} />
                 </ScrollView>

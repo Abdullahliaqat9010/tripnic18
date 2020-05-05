@@ -1,13 +1,21 @@
 import * as React from 'react';
-import { createStackNavigator,TransitionSpecs } from '@react-navigation/stack';
+import { createStackNavigator } from '@react-navigation/stack';
 import Icons from 'react-native-vector-icons/Ionicons'
+import {TouchableOpacity,Text} from 'react-native'
 //import {createBottomTabNavigator} from '@react-navigation/bottom-tabs'
 import Home from './home'
 import Settings from './settings'
 import Search from './search'
+import Filter from './filter'
 const Stack = createStackNavigator()
 
-const HomeStack = ()=>{
+const HomeStack = ({navigation,route})=>{
+    if(route.state && route.state.index > 0){
+        navigation.setOptions({tabBarVisible:false})
+    }
+    else{
+        navigation.setOptions({tabBarVisible:true})
+    }
     return(
         <Stack.Navigator>
             <Stack.Screen name="Home" component={Home}
@@ -26,17 +34,19 @@ const HomeStack = ()=>{
             />
             <Stack.Screen name="Settings" component={Settings}
             options={{
+                
                 headerTitleContainerStyle: {
                     left: 50,
                 },
             }}
             />
             <Stack.Screen name="Search" component={Search}
-            options={{
+            options={()=>({
+                
                 headerTitleContainerStyle: {
                     left: 50,
                 },
-            }}
+            })}
             />
         </Stack.Navigator>
     )
