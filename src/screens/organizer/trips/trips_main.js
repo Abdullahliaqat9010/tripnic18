@@ -171,7 +171,7 @@ export default class TripsMain extends React.Component{
                     ListHeaderComponent={()=>{
                         return(
                             <View style={{justifyContent:"center",height:50}} >
-                                <Text style={{color:"#A7A5A5"}} >Tap and Hold for more options</Text>
+                                <Text style={{color:"#A7A5A5"}} >{this.state.data.length>0?"Tap and Hold for more options":"Add new Trips"}</Text>
                             </View>
                         )
                     }}
