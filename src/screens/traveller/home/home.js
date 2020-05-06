@@ -58,14 +58,13 @@ const TourCardMinified = ({trip,navigation})=>{
                         <Icon name="ios-pricetag" size={15} />
                         <Text style={{marginLeft:5}} >{'Rs '+trip.price}</Text>
                     </View>
-                    {
-                     trip.rating > 0 &&   
+                     
                     <View style={{flex:1}} >
                         <View style={{flexDirection:"row",alignItems:"center",justifyContent:"flex-end"}}>
                             <Icon name="ios-star" size={15} color="#FDCC0D" />
-                            <Text style={{paddingLeft:10,paddingRight:5,color:"#FDCC0D",fontSize:17}} >{trip.rating}</Text>
+                            <Text style={{paddingLeft:10,paddingRight:5,color:"#FDCC0D",fontSize:17}} >{parseFloat(trip.rating)}</Text>
                         </View>
-                    </View>}
+                    </View>
                 </View>
                 
             </View>
@@ -132,7 +131,8 @@ export default class Home extends React.Component{
             topRated : [],
             bestOffers : [],
             economical : [],
-            isLoading:false
+            isLoading:false,
+            isRefreshing:false
         }
     }
     
@@ -155,6 +155,22 @@ export default class Home extends React.Component{
         }
     }
 
+    refresh = async ()=>{
+            try {
+                this.setState({isRefreshing:true})
+                const a = await fetchTopRated()
+                const b = await fetchBestOffers()
+                const c = await fetchEconomical()
+                this.setState({topRated:a})
+                this.setState({bestOffers:b})
+                this.setState({economical:c})
+                this.setState({isLoading:false})
+                this.setState({isRefreshing:false})
+            } catch (error) {
+                console.log(error)
+            }
+    }
+
     navigateToSearch = ()=>{
         this.props.navigation.navigate("Search")
     }
@@ -167,6 +183,8 @@ export default class Home extends React.Component{
                 this.state.isLoading?
                 <ProgressBarAndroid/>:
                 <FlatList
+                    refreshing={this.state.isRefreshing}
+                    onRefresh={this.refresh}
                     ListHeaderComponent={()=>{
                         return(
                             <SearchBar navigateToSearch={this.navigateToSearch} />
