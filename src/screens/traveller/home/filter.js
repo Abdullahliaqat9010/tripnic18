@@ -70,13 +70,13 @@ const PriceRange = ({setPriceRange,defaultPrice})=>{
                     </View>
                     <View style={{flexDirection:"row",alignItems:"center"}} >
                         <Text>Rs</Text>
-                        <TextInput placeholder="2000" defaultValue={defaultPrice.lower!==0?`${defaultPrice.lower}`:undefined} maxLength={5} onChangeText={(lower)=>{
+                        <TextInput keyboardType="numeric" placeholder="2000" defaultValue={defaultPrice.lower!==0?`${defaultPrice.lower}`:undefined} maxLength={5} onChangeText={(lower)=>{
                             
                             setPriceRange(lower,defaultPrice.upper)
                         }}  />
                         <Text style={{paddingHorizontal:10,fontSize:10,color:"#2BB598"}} >to</Text>
                         <Text>Rs</Text>
-                        <TextInput placeholder="5000" defaultValue={defaultPrice.upper!==0?`${defaultPrice.upper}`:undefined} maxLength={5} onChangeText={(upper)=>{
+                        <TextInput keyboardType="numeric" placeholder="5000" defaultValue={defaultPrice.upper!==0?`${defaultPrice.upper}`:undefined} maxLength={5} onChangeText={(upper)=>{
                             
                             setPriceRange(defaultPrice.lower,upper)
                         }} />
@@ -137,7 +137,7 @@ const TripDuration = ({setTripDuration,defaultDuration})=>{
                         <Text style={{fontSize:18,color:"#2BB598"}} >Trip Duration</Text>
                     </View>
                     <View style={{flexDirection:"row",alignItems:"center"}} >  
-                        <TextInput placeholder="2" maxLength={3} style={{fontSize:15}} 
+                        <TextInput keyboardType="numeric" placeholder="2" maxLength={3} style={{fontSize:15}} 
                         defaultValue={defaultDuration!==0?`${defaultDuration}`:undefined}
                         onChangeText={(duration)=>{
                             setTripDuration(duration)
@@ -165,7 +165,10 @@ const HeaderElement = ({closeModal,clearFilter})=>{
             </View>
             <View style={{flex:1,justifyContent:"center",alignItems:"flex-end"}} >
                 <TouchableOpacity
-                    onPress={()=>clearFilter()}
+                    onPress={()=>{
+                        clearFilter()
+                        closeModal()
+                    }}
                 >
                     <Text style={{fontSize:20,color:"#2BB598",fontWeight:"bold"}} >Clear</Text>
                 </TouchableOpacity>
@@ -207,9 +210,9 @@ const Filter = ({
         
         const clearFilter = ()=>{
             setSortIndex(0)
-            setPrice(0,0)
+            setPrice("0","0")
             setStarting(new Date())
-            setDuration(0)
+            setDuration("0")
         }
         const makeSelection = (i)=>{
             setSortIndex(i)

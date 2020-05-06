@@ -4,6 +4,7 @@ import Filter from './filter'
 import {searchTripWithFilter} from '../../../redux/actions/app_actions'
 import Icon from 'react-native-vector-icons/Ionicons'
 import {ProgressBarAndroid} from '@react-native-community/progress-bar-android'
+import {Toast} from '../../../components/styled_components'
 
 
 const {width} = Dimensions.get('window')
@@ -20,12 +21,18 @@ const CustomSearchBar = ({setQuery,searchTrip})=>{
                 }}  
                 placeholder="Search for your favourite places in Pakistan" 
                 onChangeText={(t)=>setQuery(t)}
+                onSubmitEditing={()=>{
+                    searchTrip()
+                }}
+                returnKeyType="search"
             />
             <Icon 
                 style={{marginLeft:10}}  
                 name="ios-search" 
                 size={30} 
-                onPress={()=>searchTrip()}
+                onPress={()=>{
+                    searchTrip()
+                }}
                 />
         </View>
     )
@@ -35,13 +42,15 @@ const Search = ({navigation}) => {
     
     const [isFilterModalOpen,setFilterModal] = React.useState(false)
     const [sortBy,setSortBy] = React.useState(0)
-    const [priceRange,setPriceRange] = React.useState({lower:0,upper:0})
+    const [priceRange,setPriceRange] = React.useState({lower:"0",upper:"0"})
     const [startingFrom, setStartingFrom] = React.useState(null)
-    const [tripDuration,setTripDuration] = React.useState(0)
+    const [tripDuration,setTripDuration] = React.useState("0")
     const [trips,setTrips] = React.useState([])
     const [placeholder,setPlaceholder] = React.useState("")
     const [query,setQuery] = React.useState("")
     const [isSearching,setSearching] = React.useState(false)
+    const [msg,setMsg] = React.useState("")
+    const [toggleToast,setToggleToast] = React.useState(false)
     
     
     const makeSelection = (i)=>{
@@ -69,8 +78,10 @@ const Search = ({navigation}) => {
 
     const searchTrip = async()=>{
         try {
+            if(query === "")
+            return
             setSearching(true)
-            const t = await searchTripWithFilter(query,{})
+            const t = await searchTripWithFilter(query,{sortBy,priceRange,startingFrom,tripDuration})
             setSearching(false)
             setTrips(t)
             if(t.length > 0){
@@ -81,9 +92,17 @@ const Search = ({navigation}) => {
             }
             //console.log(t) 
         } catch (error) {
-            console.log(error)
+            setMsg(error)
+            setSearching(false)
+            setToggleToast(true)
         }
     }
+
+    React.useEffect(()=>{
+        if(toggleToast){
+            setToggleToast(false)
+        }
+    },[toggleToast])
 
     React.useLayoutEffect(() => {
         navigation.setOptions({
@@ -136,7 +155,7 @@ const Search = ({navigation}) => {
                             return(
                                 <TouchableOpacity 
                                 onPress={()=>{
-                                    //navigateToPreviewTrip(trip.id)
+                                    navigation.navigate("Preview",{id:trip.id})
                                 }}
                             
                                 activeOpacity={0.9}
@@ -192,6 +211,7 @@ const Search = ({navigation}) => {
                     setDuration = {selectDuration}
                     defaultDuration = {tripDuration}
                 />
+                <Toast message={msg} visible={toggleToast} />
             </View>
         )
     

@@ -1,9 +1,11 @@
 import React from 'react'
-import {View,ScrollView,Text,StyleSheet,Dimensions,TouchableOpacity,Image} from 'react-native'
-import {StyledDatePicker} from '../../../components/styled_components'
+import {View,ScrollView,Text,StyleSheet,Dimensions,TouchableOpacity,Image,ImageBackground} from 'react-native'
+import {StyledDatePicker,StyledButton,Toast} from '../../../components/styled_components'
 import CheckBox from '@react-native-community/checkbox';
-import {fetchTripDetials} from '../../../redux/actions/app_actions'
+import {fetchTripDetials,addTripRequest,isRequested,isTripLiked,likeTrip,unlikeTrip} from '../../../redux/actions/app_actions'
 import {ProgressBarAndroid} from '@react-native-community/progress-bar-android'
+import Loading from '../../common/loading'
+import Icon  from 'react-native-vector-icons/Ionicons';
 
 const {width} = Dimensions.get('window')
 
@@ -11,12 +13,15 @@ class PreviewTrip extends React.Component {
     constructor(props){
         super(props)
         this.state = {
+            isRequestedTrip:false,
+            isLiked:false,
             id:props.route.params?.id,
-            isScheduleModalOpen:false,
             capacity:0,
             title:"",
             to:"",
             msg:"",
+            toggleToast:"",
+            isLoading:false,
             thumbnail:"https://sweettutos.com/wp-content/uploads/2015/12/placeholder.png",
             from:"",
             description:"",
@@ -40,13 +45,17 @@ class PreviewTrip extends React.Component {
     
     async componentDidMount(){
         this.setState({isFetchingDetails:true})
-        await this.fetchDetails()
+        this.fetchDetails()
     }
 
     fetchDetails = async()=>{
         try {
             const trip = await fetchTripDetials(this.props.route.params?.id)
+            const isRequestedTrip = await isRequested(this.state.id)
+            const isLiked = await isTripLiked(this.state.id)
             this.setState({
+                isRequestedTrip:isRequestedTrip,
+                isLiked:isLiked,
                 title:trip.title,
                 to:trip.to,
                 from:trip.from,
@@ -77,11 +86,65 @@ class PreviewTrip extends React.Component {
         }
     }
 
+    addRequest = async()=>{
+        try {
+            this.setState({isLoading:true})
+            await addTripRequest(this.state.id)
+            this.setState({isLoading:false})
+            this.setState({msg:"Successfully Requested the trip."},()=>{
+                this.setState({toggleToast:true},()=>{
+                  this.setState({toggleToast:false})
+                })
+              })
+        } catch (error) {
+            this.setState({isLoading:false})
+            this.setState({msg:error},()=>{
+              this.setState({toggleToast:true},()=>{
+                this.setState({toggleToast:false})
+              })
+            })
+        }
+    }
+
+    likeTrip = async()=>{
+        try {
+            await likeTrip(this.state.id)
+            this.setState({msg:"Added to your likes",isLiked:true},()=>{
+                this.setState({toggleToast:true},()=>{
+                  this.setState({toggleToast:false})
+                })
+            })
+        } catch (error) {
+            this.setState({msg:error},()=>{
+              this.setState({toggleToast:true},()=>{
+                this.setState({toggleToast:false})
+              })
+            })
+        }
+    }
+
+    unlikeTrip = async()=>{
+        try {
+            await unlikeTrip(this.state.id)
+            this.setState({msg:"Successfully removed from your likes",isLiked:false},()=>{
+                this.setState({toggleToast:true},()=>{
+                  this.setState({toggleToast:false})
+                })
+            })
+        } catch (error) {
+            this.setState({msg:error},()=>{
+              this.setState({toggleToast:true},()=>{
+                this.setState({toggleToast:false})
+              })
+            })
+        }
+    }
+
     render(){
         if(this.state.isFetchingDetails){
             return(
                 <View style={{flex:1,alignItems:"center",justifyContent:"center"}} >
-                    <ProgressBarAndroid color="#2F9AE3" />
+                    <ProgressBarAndroid color="#2BB598" />
                 </View>
             )
         }
@@ -94,8 +157,23 @@ class PreviewTrip extends React.Component {
                         onPress={this.selectImage}
                         activeOpacity={0.9}
                     >
-                        <Image style={{width:width,height:250}} source={{uri:this.state.thumbnail}} 
-                        />
+                        {/* <Image style={{width:width,height:250}} source={{uri:this.state.thumbnail}} 
+                        /> */}
+                        <ImageBackground 
+                            style={{width:width,height:250}} 
+                            source={{uri:this.state.thumbnail}} 
+                        >
+                        <View style={{flex:1,justifyContent:"flex-end",alignItems:"flex-start",margin:20}} >
+                            <View style={{borderRadius:5,width:45,height:45,alignItems:"center",justifyContent:"center",backgroundColor:"rgba(0,0,0,0.7)"}} >
+                                <Icon 
+                                    name="ios-heart" 
+                                    size={35} 
+                                    color={this.state.isLiked?"red":"white"} 
+                                    onPress={this.state.isLiked?this.unlikeTrip:this.likeTrip}
+                                />
+                            </View>
+                        </View>
+                        </ImageBackground>
                             
                         
                     </TouchableOpacity>
@@ -258,8 +336,36 @@ class PreviewTrip extends React.Component {
                     }
 
                     
-                    <View style={{height:100}} />
-
+                    <View style={{height:160,justifyContent:"center"}} >
+                        {
+                            this.state.isRequestedTrip?
+                            <StyledButton 
+                            onPress={()=>{
+                                this.setState({msg:"You have already requested trip."},()=>{
+                                    this.setState({toggleToast:true},()=>{
+                                      this.setState({toggleToast:false})
+                                    })
+                                })
+                            }}
+                            loading={this.state.isLoading} 
+                            width={150} 
+                            fontSize={20} 
+                            backgroundColor="#707070"
+                            title="Add Request" 
+                            roundEdged 
+                            />:
+                            <StyledButton 
+                            onPress={this.addRequest}
+                            loading={this.state.isLoading} 
+                            width={150} 
+                            fontSize={20} 
+                            title="Add Request" 
+                            roundEdged 
+                            />
+                        }
+                    </View>
+                    <Toast message={this.state.msg} visible={this.state.toggleToast} />
+                    <Loading visible={this.state.isLoading} />
                 </ScrollView>
 
         )

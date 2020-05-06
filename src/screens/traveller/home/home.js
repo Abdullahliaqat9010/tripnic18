@@ -1,10 +1,12 @@
 import React from 'react'
 import {View,Text, FlatList,TouchableOpacity,StyleSheet,Dimensions,ImageBackground} from 'react-native'
 import Icon from 'react-native-vector-icons/Ionicons'
+import { fetchBestOffers, fetchTopRated, fetchEconomical } from '../../../redux/actions/app_actions'
 
 const {width} = Dimensions.get('window')
 
-const TourCardMinified = ()=>{
+const TourCardMinified = ({trip,navigation})=>{
+    //console.log(trip)
     return(
         <TouchableOpacity 
             style={{
@@ -16,19 +18,20 @@ const TourCardMinified = ()=>{
                 borderRadius:10
             }} 
             activeOpacity={0.9}
+            onPress={()=>navigation.navigate("Preview",{id:trip.id})}
             >
             <ImageBackground 
-                source={{uri:'https://images.pexels.com/photos/414171/pexels-photo-414171.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500'}}
+                source={{uri:trip.thumbnail}}
                 style={{width:250,height:180}}
                 imageStyle={{borderTopLeftRadius:10,borderTopRightRadius:10}}
             >
                 <View style={{flex:1,flexDirection:"row"}} >
                    
                     <View style={{padding:10,flex:1,alignItems:"flex-start",justifyContent:"flex-end"}} >
-                        {   50 > 0 &&
+                        {   trip.discount > 0 &&
                             <View style={{flexDirection:"row",borderRadius:5,width:100,alignItems:"center",justifyContent:"center",marginBottom:5,backgroundColor:"#2BB396"}} >
                                 <Icon name="md-flame" size={25} color="white" />
-                                <Text style={{marginLeft:5,color:"white",fontSize:20}} >{'50'+'% off'}</Text>
+                                <Text style={{marginLeft:5,color:"white",fontSize:20}} >{trip.discount+'% off'}</Text>
                             </View>
                         }
                     </View>
@@ -39,28 +42,29 @@ const TourCardMinified = ()=>{
             </ImageBackground>
             <View style={{flex:1,padding:10,justifyContent:"center"}} >
                 <View style={{marginBottom:10}} >
-                    <Text style={{fontSize:17,fontWeight:"bold"}} >Title testing for the long titles</Text>
+                    <Text style={{fontSize:17,fontWeight:"bold"}} >{trip.title}</Text>
                 </View>
                 <View style={{flexDirection:"row",alignItems:"center",marginBottom:5}} >
                     <Icon name="ios-timer" size={15} />
-                    <Text style={{marginLeft:5}} >{"5"+' days'}</Text>
+                    <Text style={{marginLeft:5}} >{trip.duration+' days'}</Text>
                 </View>
                 <View style={{flexDirection:"row",alignItems:"center",marginBottom:5}} >
                     <Icon name="md-person" size={15} />
-                    <Text style={{marginLeft:5}} >{'20'+' persons'}</Text>
+                    <Text style={{marginLeft:5}} >{trip.capacity+' persons'}</Text>
                 </View>
                 <View style={{flexDirection:"row",alignItems:"center",marginBottom:5}} >
                     <View style={{width:100,flexDirection:"row",alignItems:"center"}} >
                         <Icon name="ios-pricetag" size={15} />
-                        <Text style={{marginLeft:5}} >{'Rs '+'2000'}</Text>
+                        <Text style={{marginLeft:5}} >{'Rs '+trip.price}</Text>
                     </View>
+                    {
+                     trip.rating > 0 &&   
                     <View style={{flex:1}} >
                         <View style={{flexDirection:"row",alignItems:"center",justifyContent:"flex-end"}}>
                             <Icon name="ios-star" size={15} color="#FDCC0D" />
-                            <Text style={{paddingLeft:10,paddingRight:5,color:"#FDCC0D",fontSize:17}} >4.5</Text>
-                            <Text style={{fontSize:15,color:"grey"}} >(3)</Text>
+                            <Text style={{paddingLeft:10,paddingRight:5,color:"#FDCC0D",fontSize:17}} >{trip.rating}</Text>
                         </View>
-                    </View>
+                    </View>}
                 </View>
                 
             </View>
@@ -68,7 +72,8 @@ const TourCardMinified = ()=>{
     )
 }
 
-const HorizondalScrollItems = ()=>{
+const HorizondalScrollItems = ({data,navigation})=>{
+    //console.log(data)
     return(
         <FlatList
             style={{paddingLeft:5,backgroundColor:"white"}}
@@ -86,15 +91,9 @@ const HorizondalScrollItems = ()=>{
                 )
             }}
             showsHorizontalScrollIndicator={false}
-            data={[{title: 'Title Text', key: '1'},
-                    {title: 'Title Text', key: '2'},
-                    {title: 'Title Text', key: '3'},
-                    {title: 'Title Text', key: '4'},
-                    {title: 'Title Text', key: '5'},
-                    {title: 'Title Text', key: '6'}
-                    ]}
-            renderItem={({item, index, separators}) => (
-                <TourCardMinified />
+            data={data}
+            renderItem={({item}) => (
+                <TourCardMinified trip={item} navigation={navigation} />
             )}
             />
     )
@@ -127,8 +126,33 @@ const SearchBar = (props)=>{
 export default class Home extends React.Component{
     constructor(props){
         super(props)
+        this.state = {
+            topRated : [],
+            bestOffers : [],
+            economical : []
+        }
     }
     
+    componentDidMount(){
+        this.fetchTripsOnStart()
+    }
+
+    fetchTripsOnStart = async()=>{
+        try {
+            const a = await fetchTopRated()
+            const b = await fetchBestOffers()
+            const c = await fetchEconomical()
+            // console.log(a)
+            // console.log(b)
+            // console.log(c)
+            this.setState({topRated:a})
+            this.setState({bestOffers:b})
+            this.setState({economical:c})
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     navigateToSearch = ()=>{
         this.props.navigation.navigate("Search")
     }
@@ -154,7 +178,13 @@ export default class Home extends React.Component{
                                 <Text style={{paddingLeft:20,fontSize:30,fontWeight:"bold"}} >{item.title}</Text>
                             </View>
                             <View style={{height:310,justifyContent:"center"}} >
-                                <HorizondalScrollItems/>
+                                {
+                                    item.key === '1'?
+                                    <HorizondalScrollItems data={this.state.topRated} navigation={this.props.navigation} />:
+                                    item.key === '2'?
+                                    <HorizondalScrollItems data={this.state.bestOffers} navigation={this.props.navigation} />:
+                                    <HorizondalScrollItems data={this.state.economical} navigation={this.props.navigation} />
+                                }
                             </View>
                         </View>
                     )}

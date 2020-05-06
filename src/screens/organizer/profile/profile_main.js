@@ -1,10 +1,18 @@
 import React from 'react'
 import {View,Text, Button, Image} from 'react-native'
 import { TouchableOpacity, ScrollView, TextInput, } from 'react-native-gesture-handler'
-
-
+import {signout} from '../../../redux/actions/auth_actions'
+import {store} from '../../../redux/store'
 
 export default class Profile extends React.Component{
+    constructor(props){
+      super(props)
+    }
+
+    logout = async()=>{
+      await store.dispatch(signout())
+    }
+
     render(){
         return(
            <ScrollView>
@@ -198,7 +206,7 @@ export default class Profile extends React.Component{
                 <Image source = {require('../../../assets/LogoutIcon.png')} height = {24}/>
                 </View>
                 <View style = {{flex :0.6}}>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={this.logout} >
                 <Text style = {{fontSize:24, alignSelf : 'flex-start', paddingLeft:10}}>Logout</Text>
                 </TouchableOpacity>
                 </View>
