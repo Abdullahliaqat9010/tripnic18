@@ -1,6 +1,8 @@
 import React from 'react'
 import {View,Text, Button,ImageBackground, Image, TouchableOpacity} from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
+import {store} from '../../../redux/store'
+import {signout} from '../../../redux/actions/auth_actions'
 
 export default class Profile extends React.Component{
     render(){
@@ -96,7 +98,7 @@ export default class Profile extends React.Component{
                 <Image source = {require('../../../assets/LogoutIcon.png')} height = {24}/>
                 </View>
                 <View style = {{flex :0.6}}>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={()=>store.dispatch( signout())} >
                 <Text style = {{fontSize:24, alignSelf : 'flex-start', paddingLeft:10}}>Logout</Text>
                 </TouchableOpacity>
                 </View>
