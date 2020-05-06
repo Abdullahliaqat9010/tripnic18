@@ -1,7 +1,5 @@
 import React from 'react'
 import {View,Text,TouchableOpacity,Image, Dimensions,FlatList,StyleSheet,Alert} from 'react-native'
-import { store } from '../../../redux/store'
-import { signout } from '../../../redux/actions/auth_actions'
 import {FAB} from 'react-native-paper'
 import {Toast} from '../../../components/styled_components'
 import Icon from 'react-native-vector-icons/Ionicons'

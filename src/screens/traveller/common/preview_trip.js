@@ -2,7 +2,7 @@ import React from 'react'
 import {View,ScrollView,Text,StyleSheet,Dimensions,TouchableOpacity,Image,ImageBackground} from 'react-native'
 import {StyledDatePicker,StyledButton,Toast} from '../../../components/styled_components'
 import CheckBox from '@react-native-community/checkbox';
-import {fetchTripDetials,addTripRequest,isRequested,isTripLiked,likeTrip,unlikeTrip} from '../../../redux/actions/app_actions'
+import {fetchTripDetials,addTripRequest,isRequested,isTripLiked,likeTrip,unlikeTrip,cancelTripRequest} from '../../../redux/actions/app_actions'
 import {ProgressBarAndroid} from '@react-native-community/progress-bar-android'
 import Loading from '../../common/loading'
 import Icon  from 'react-native-vector-icons/Ionicons';
@@ -91,7 +91,29 @@ class PreviewTrip extends React.Component {
             this.setState({isLoading:true})
             await addTripRequest(this.state.id)
             this.setState({isLoading:false})
+            this.setState({isRequestedTrip:true})
             this.setState({msg:"Successfully Requested the trip."},()=>{
+                this.setState({toggleToast:true},()=>{
+                  this.setState({toggleToast:false})
+                })
+              })
+        } catch (error) {
+            this.setState({isLoading:false})
+            this.setState({msg:error},()=>{
+              this.setState({toggleToast:true},()=>{
+                this.setState({toggleToast:false})
+              })
+            })
+        }
+    }
+
+    cancelRequest = async()=>{
+        try {
+            this.setState({isLoading:true})
+            await cancelTripRequest(this.state.id)
+            this.setState({isLoading:false})
+            this.setState({isRequestedTrip:false})
+            this.setState({msg:"Your request has been removed."},()=>{
                 this.setState({toggleToast:true},()=>{
                   this.setState({toggleToast:false})
                 })
@@ -340,18 +362,11 @@ class PreviewTrip extends React.Component {
                         {
                             this.state.isRequestedTrip?
                             <StyledButton 
-                            onPress={()=>{
-                                this.setState({msg:"You have already requested trip."},()=>{
-                                    this.setState({toggleToast:true},()=>{
-                                      this.setState({toggleToast:false})
-                                    })
-                                })
-                            }}
+                            onPress={this.cancelRequest}
                             loading={this.state.isLoading} 
-                            width={150} 
+                            width={160} 
                             fontSize={20} 
-                            backgroundColor="#707070"
-                            title="Add Request" 
+                            title="Cancel Request" 
                             roundEdged 
                             />:
                             <StyledButton 

@@ -126,6 +126,29 @@ const fetchTrips = ()=>{
   })
 }
 
+const fetchRequestedTrips = ()=>{
+  return new Promise((res,rej)=>{
+    try {
+      const unsubscribe = auth().onAuthStateChanged(async(user)=>{
+        if(user){
+          const tripRef = firestore().collection('trips').where('acceptedTravellers','array-contains',user.uid)
+          const snapshot = await tripRef.get()
+          unsubscribe()
+          res(snapshot.docs.map((doc)=>({...doc.data(),id:doc.id})))    
+        }
+        else{
+          unsubscribe()
+          rej("You are not authorized here")
+        }
+      })
+    } catch (error) {
+      unsubscribe()
+      rej(error.message)
+    }
+  })
+}
+
+
 const fetchTopRated = ()=>{
   return new Promise((res,rej)=>{
     try {
@@ -272,7 +295,7 @@ const addTripRequest = (id)=>{
        if(user){
           const tripRef = firestore().collection('trips').doc(id)
           await tripRef.update({
-            requestedBy:firestore.FieldValue.arrayUnion(user.uid)
+            requestedBy:firestore.FieldValue.arrayUnion(user.uid.toString())
           })
           unsubscribe()
           res()
@@ -289,16 +312,15 @@ const addTripRequest = (id)=>{
   })
 }
 
-const cancelTrip = (id)=>{
+const cancelTripRequest = (id)=>{
   return new Promise((res,rej)=>{
     try {
-      console.log(id)
       const unsubscribe = auth().onAuthStateChanged(async(user)=>{
        if(user){
           const tripRef = firestore().collection('trips').doc(id)
           await tripRef.update({
-            requestedBy:firestore.FieldValue.arrayRemove(user.uid),
-            acceptedTravellers:firestore.FieldValue.arrayRemove(user.uid)
+            requestedBy:firestore.FieldValue.arrayRemove(user.uid.toString()),
+            acceptedTravellers:firestore.FieldValue.arrayRemove(user.uid.toString())
           })
           unsubscribe()
           res()
@@ -323,7 +345,7 @@ const likeTrip = (id)=>{
        if(user){
           const tripRef = firestore().collection('trips').doc(id)
           await tripRef.update({
-            likedBy:firestore.FieldValue.arrayUnion(user.uid)
+            likedBy:firestore.FieldValue.arrayUnion(user.uid.toString())
           })
           unsubscribe()
           res()
@@ -347,7 +369,7 @@ const unlikeTrip = (id)=>{
        if(user){
           const tripRef = firestore().collection('trips').doc(id)
           await tripRef.update({
-            likedBy:firestore.FieldValue.arrayRemove(user.uid)
+            likedBy:firestore.FieldValue.arrayRemove(user.uid.toString())
           })
           unsubscribe()
           res()
@@ -363,6 +385,56 @@ const unlikeTrip = (id)=>{
     }
   })
 }
+
+const acceptRequest = (traveller_id,trip_id)=>{
+  return new Promise((res,rej)=>{
+    try {
+      const unsubscribe = auth().onAuthStateChanged(async(user)=>{
+       if(user){
+          const tripRef = firestore().collection('trips').doc(trip_id)
+          await tripRef.update({
+            requestedBy:firestore.FieldValue.arrayRemove(traveller_id.toString()),
+            acceptedTravellers:firestore.FieldValue.arrayUnion(user.uid.toString())
+          })
+          unsubscribe()
+          res()
+       }
+       else{
+         unsubscribe()
+         rej("you are not authorized")
+       }
+      })
+    } catch (error) {
+      unsubscribe()
+      rej(error.message)
+    }
+  })
+}
+
+const declineRequest = (traveller_id,trip_id)=>{
+  return new Promise((res,rej)=>{
+    try {
+      const unsubscribe = auth().onAuthStateChanged(async(user)=>{
+       if(user){
+          const tripRef = firestore().collection('trips').doc(trip_id)
+          await tripRef.update({
+            requestedBy:firestore.FieldValue.arrayRemove(traveller_id.toString()),
+          })
+          unsubscribe()
+          res()
+       }
+       else{
+         unsubscribe()
+         rej("you are not authorized")
+       }
+      })
+    } catch (error) {
+      unsubscribe()
+      rej(error.message)
+    }
+  })
+}
+
 
 const isRequested = (id)=>{
   return new Promise((res,rej)=>{
@@ -438,4 +510,5 @@ const isTripLiked = (id)=>{
 }
 
 
-export {addNewTrip,fetchTrips,editTrip,fetchTripDetials,deleteTrip,searchTripWithFilter,addTripRequest,likeTrip,unlikeTrip,cancelTrip,isRequested,isTripLiked,fetchTopRated,fetchBestOffers,fetchEconomical}
+
+export {acceptRequest,declineRequest,fetchRequestedTrips,cancelTripRequest,addNewTrip,fetchTrips,editTrip,fetchTripDetials,deleteTrip,searchTripWithFilter,addTripRequest,likeTrip,unlikeTrip,isRequested,isTripLiked,fetchTopRated,fetchBestOffers,fetchEconomical}

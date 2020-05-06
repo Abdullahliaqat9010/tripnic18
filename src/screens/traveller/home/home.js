@@ -2,6 +2,7 @@ import React from 'react'
 import {View,Text, FlatList,TouchableOpacity,StyleSheet,Dimensions,ImageBackground} from 'react-native'
 import Icon from 'react-native-vector-icons/Ionicons'
 import { fetchBestOffers, fetchTopRated, fetchEconomical } from '../../../redux/actions/app_actions'
+import {ProgressBarAndroid} from '@react-native-community/progress-bar-android'
 
 const {width} = Dimensions.get('window')
 
@@ -35,9 +36,9 @@ const TourCardMinified = ({trip,navigation})=>{
                             </View>
                         }
                     </View>
-                    <View style={{ padding:10,flex:1,alignItems:"flex-end",justifyContent:"flex-end"}} >
+                    {/* <View style={{ padding:10,flex:1,alignItems:"flex-end",justifyContent:"flex-end"}} >
                         <Icon onPress={()=>console.log("heart")} name="ios-heart" size={35} color="white" />
-                    </View>
+                    </View> */}
                 </View>
             </ImageBackground>
             <View style={{flex:1,padding:10,justifyContent:"center"}} >
@@ -90,6 +91,7 @@ const HorizondalScrollItems = ({data,navigation})=>{
                 <View style={{flex:1,width:20}} />
                 )
             }}
+            
             showsHorizontalScrollIndicator={false}
             data={data}
             renderItem={({item}) => (
@@ -129,7 +131,8 @@ export default class Home extends React.Component{
         this.state = {
             topRated : [],
             bestOffers : [],
-            economical : []
+            economical : [],
+            isLoading:false
         }
     }
     
@@ -139,15 +142,14 @@ export default class Home extends React.Component{
 
     fetchTripsOnStart = async()=>{
         try {
+            this.setState({isLoading:true})
             const a = await fetchTopRated()
             const b = await fetchBestOffers()
             const c = await fetchEconomical()
-            // console.log(a)
-            // console.log(b)
-            // console.log(c)
             this.setState({topRated:a})
             this.setState({bestOffers:b})
             this.setState({economical:c})
+            this.setState({isLoading:false})
         } catch (error) {
             console.log(error)
         }
@@ -161,6 +163,9 @@ export default class Home extends React.Component{
         return(
             <>
             <View style={{flex:1,alignItems:"center",justifyContent:"center",backgroundColor:"white"}}>
+                {
+                this.state.isLoading?
+                <ProgressBarAndroid/>:
                 <FlatList
                     ListHeaderComponent={()=>{
                         return(
@@ -189,7 +194,7 @@ export default class Home extends React.Component{
                         </View>
                     )}
                     keyExtractor={item => item.key}
-                    />
+                    />}
             </View>
             
             </>
