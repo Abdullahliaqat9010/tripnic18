@@ -6,7 +6,7 @@ import {TouchableOpacity,Text} from 'react-native'
 import Home from './home'
 import Settings from './settings'
 import Search from './search'
-import Filter from './filter'
+import PreviewTrip from '../common/preview_trip'
 const Stack = createStackNavigator()
 
 const HomeStack = ({navigation,route})=>{
@@ -33,6 +33,14 @@ const HomeStack = ({navigation,route})=>{
                 })}
             />
             <Stack.Screen name="Settings" component={Settings}
+            options={{
+                
+                headerTitleContainerStyle: {
+                    left: 50,
+                },
+            }}
+            />
+            <Stack.Screen name="Preview" component={PreviewTrip}
             options={{
                 
                 headerTitleContainerStyle: {

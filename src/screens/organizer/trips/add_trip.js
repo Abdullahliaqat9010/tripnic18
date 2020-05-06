@@ -1,11 +1,9 @@
 import React from 'react'
 import {View,ScrollView,Text,StyleSheet,Dimensions,TouchableOpacity,Image, TextInput} from 'react-native'
-import storage from '@react-native-firebase/storage'
 import {StyledDatePicker,StyledPicker,StyledTextInput, StyledButton,Toast} from '../../../components/styled_components'
 import CheckBox from '@react-native-community/checkbox';
 import {addNewTrip} from '../../../redux/actions/app_actions'
 import ImagePicker from 'react-native-image-picker'
-import AddSchedule from './add_schedule'
 import Loading from '../../common/loading'
 import {validateTripInfo} from '../../../components/validations'
 

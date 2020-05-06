@@ -219,9 +219,9 @@ class EditTrip extends React.Component {
                         <Text style={styles.heading} >Start Date - End Date</Text>
                     </View>
                     <View style={styles.pickers} >
-                        <StyledDatePicker defaultDate={new Date(this.state.start_date)} onChangeDate={this.selectStartDate} />
+                        <StyledDatePicker defaultDate={new Date(parseInt(this.state.start_date))} onChangeDate={this.selectStartDate} />
                         <Text style={{paddingHorizontal:17}} >-</Text>
-                        <StyledDatePicker defaultDate={new Date(this.state.end_date)} onChangeDate={this.selectEndDate} />
+                        <StyledDatePicker defaultDate={new Date(parseInt(this.state.end_date))} onChangeDate={this.selectEndDate} />
                     </View>
 
 
