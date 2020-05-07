@@ -2,6 +2,7 @@ import React from 'react';
 import {StyleSheet,View,Text,Alert} from 'react-native';
 import {store} from '../../redux/store';
 import {navigateToMainApp, signout, validateUserOnStart } from '../../redux/actions/auth_actions'
+import {ProgressBarAndroid} from '@react-native-community/progress-bar-android'
 
 export default class AppLoading extends React.Component {
   constructor(props){
@@ -48,7 +49,9 @@ export default class AppLoading extends React.Component {
   render(){
     return(
       <View style={styles.container}>
-        <Text>Loading App...</Text>
+        <Text style={{fontSize:60,fontWeight:"bold",paddingBottom:80}} >TRIPNIC</Text>
+        <ProgressBarAndroid color="#2F9AE3" />
+        {/* <Text>Loading App...</Text> */}
       </View>
     ) 
   }
