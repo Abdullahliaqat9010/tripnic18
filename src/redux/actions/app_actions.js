@@ -397,11 +397,12 @@ const acceptRequest = (traveller_id,trip_id,notification_id)=>{
           const tripRef = firestore().collection('trips').doc(trip_id)
            batch.update(tripRef,{
             requestedBy:firestore.FieldValue.arrayRemove(traveller_id.toString()),
-            acceptedTravellers:firestore.FieldValue.arrayUnion(user.uid.toString())
+            acceptedTravellers:firestore.FieldValue.arrayUnion(traveller_id.toString())
           })
           batch.update(notificationRef,{
             isResponded:true
           })
+          await batch.commit()
           unsubscribe()
           res()
        }
