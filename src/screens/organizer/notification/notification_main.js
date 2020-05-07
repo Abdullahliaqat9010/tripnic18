@@ -7,8 +7,10 @@ const {width} = Dimensions.get('window')
 
 const NotificationCard = ({notification,navigation,deleteNotification})=>{
     const fetchTime = (time)=>{
+        console.log(time)
         const rightNow = new Date().getTime()
-        const date = new Date(time).getTime()
+        const date = new Date(parseInt(time)).getTime()
+        console.log(date)
         let difference = rightNow-date
         difference = difference/(1000)
         if(difference < 59){
@@ -113,6 +115,7 @@ export default class NotificationMain extends React.Component{
         try {
            await deleteNotification(id)
            this.setState({msg:"Successfully removed notification from your list"})
+           this.fetchNotifications()
            this.setState({toggleToast:true},()=>{
             this.setState({toggleToast:false})
            })
@@ -126,7 +129,7 @@ export default class NotificationMain extends React.Component{
 
     render(){
         return(
-            <View style={{flex:1,alignItems:"center",justifyContent:"center"}}>
+            <View style={{flex:1,alignItems:"center",justifyContent:"center",backgroundColor:"white"}}>
                 
                 {
                 this.state.isLoading?
@@ -153,7 +156,7 @@ export default class NotificationMain extends React.Component{
                     
                     renderItem={({item})=>{
                         return(
-                            <NotificationCard navigation={this.props.navigation}  notification={item} />
+                            <NotificationCard navigation={this.props.navigation} deleteNotification={this.deleteNotification}  notification={item} />
                         )
                     }}
                     keyExtractor={(item)=>item.id}

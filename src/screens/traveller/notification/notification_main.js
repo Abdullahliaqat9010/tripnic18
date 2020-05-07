@@ -8,7 +8,7 @@ const {width} = Dimensions.get('window')
 const NotificationCard = ({notification,deleteNotification})=>{
     const fetchTime = (time)=>{
         const rightNow = new Date().getTime()
-        const date = new Date(time).getTime()
+        const date = new Date(parseInt(time)).getTime()
         let difference = rightNow-date
         difference = difference/(1000)
         if(difference < 59){
@@ -33,7 +33,7 @@ const NotificationCard = ({notification,deleteNotification})=>{
         <TouchableOpacity
             activeOpacity={0.7}
             onLongPress={()=>{
-                if(notification.isResponded){
+                
                     Alert.alert('','Delete this notification',[
                         {
                             text:"Yes",
@@ -46,7 +46,7 @@ const NotificationCard = ({notification,deleteNotification})=>{
                         }
                     ]
                     ,{cancelable:true})
-                }
+                
             }}
         >
             <View style={{
@@ -112,6 +112,7 @@ export default class NotificationMain extends React.Component{
         try {
            await deleteNotification(id)
            this.setState({msg:"Successfully removed notification from your list"})
+           this.fetchNotifications()
            this.setState({toggleToast:true},()=>{
             this.setState({toggleToast:false})
            })
@@ -152,7 +153,7 @@ export default class NotificationMain extends React.Component{
                     
                     renderItem={({item})=>{
                         return(
-                            <NotificationCard navigation={this.props.navigation}  notification={item} />
+                            <NotificationCard navigation={this.props.navigation} deleteNotification={this.deleteNotification} notification={item} />
                         )
                     }}
                     keyExtractor={(item)=>item.id}

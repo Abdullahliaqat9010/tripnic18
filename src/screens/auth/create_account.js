@@ -191,7 +191,7 @@ const CreateAccount = (props) => {
                   {
                     imageUploading?
                     <View style={{alignItems:"center",justifyContent:"center",width:80,height:80,borderRadius:10,marginTop:10,borderWidth:1,backgroundColor:"#DFDBDB"}}>
-                      <ProgressBarAndroid  />
+                      <ProgressBarAndroid color="white" />
                     </View>
                     :
                     <Image style={{width:80,height:80,borderRadius:10,marginTop:10,borderWidth:1,borderColor:"grey"}} source={src?{uri:src}:require('../../assets/profile-placeholder.png')} />
