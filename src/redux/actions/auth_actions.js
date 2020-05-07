@@ -303,39 +303,46 @@ const sendPhoneVerificationCode = (phone) => {
 }
 
 const verifyCode = (code,verificationId)  => {
-  return new Promise(  (res,rej)=>{
+  return new Promise( (res,rej)=>{
     try {
         const isOrganizer = store.getState().authReducer.isOrganizer
         const unsubscribe = auth().onAuthStateChanged(async(user)=>{
-          const credentials = auth.PhoneAuthProvider.credential(verificationId,code)
-          await auth().currentUser.updatePhoneNumber(credentials)
-          console.log(auth().currentUser.phoneNumber)
-          await firestore().collection(isOrganizer?'organizers':'travellers').doc(user.uid).update({
-            phone:auth().currentUser.phoneNumber
-          })
-          unsubscribe()
-          res()
+          if(user){
+            try {
+              const credentials = auth.PhoneAuthProvider.credential(verificationId,code)
+              await auth().currentUser.updatePhoneNumber(credentials)
+              await firestore().collection(isOrganizer?'organizers':'travellers').doc(user.uid).update({
+                phone:auth().currentUser.phoneNumber
+              })
+              unsubscribe()
+              res()
+            } catch (error) {
+              if(error.code === "auth/invalid-verification-code"){
+                unsubscribe()
+                rej("Invalid Verification Code")
+              }
+              else if(error.code === "auth/session-expired"){
+                unsubscribe()
+                rej("Verification Code Expired. Try Resending")
+              }
+              else if(error.code === "auth/credential-already-in-use"){
+                unsubscribe()
+                rej("This mobile number is already registered")
+              }
+              else{
+                unsubscribe()
+                rej(error.message)
+              }
+            }
+          }
+          else{
+            rej("You are not authorized here")
+          }
         })
     } 
     catch (error) {
-      if(error.code === "auth/invalid-verification-code"){
-        unsubscribe()
-        rej("Invalid Verification Code")
-      }
-      else if(error.code === "auth/session-expired"){
-        unsubscribe()
-        rej("Verification Code Expired. Try Resending")
-      }
-      else if(error.code === "auth/credential-already-in-use"){
-        unsubscribe()
-        rej("This mobile number is already registered")
-      }
-      else{
-        unsubscribe()
-        rej(error.message)
-      }
-      
-      }
+      rej(error.message)
+    }
   })
 }
 
