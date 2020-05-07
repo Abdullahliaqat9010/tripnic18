@@ -59,12 +59,12 @@ const TourCardMinified = ({trip,navigation})=>{
                         <Text style={{marginLeft:5}} >{'Rs '+trip.price}</Text>
                     </View>
                      
-                    <View style={{flex:1}} >
+                    {/* <View style={{flex:1}} >
                         <View style={{flexDirection:"row",alignItems:"center",justifyContent:"flex-end"}}>
                             <Icon name="ios-star" size={15} color="#FDCC0D" />
                             <Text style={{paddingLeft:10,paddingRight:5,color:"#FDCC0D",fontSize:17}} >{parseFloat(trip.rating)}</Text>
                         </View>
-                    </View>
+                    </View> */}
                 </View>
                 
             </View>

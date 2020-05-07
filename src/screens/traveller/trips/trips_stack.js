@@ -1,10 +1,16 @@
 import * as React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import TripsMain from './trips_main'
-import PreviewTrip from '../common/preview_trip'
+import PreviewTrip from './preview_trip'
 const Stack = createStackNavigator()
 
-const TripsStack = ()=>{
+const TripsStack = ({navigation,route})=>{
+    if(route.state && route.state.index > 0){
+        navigation.setOptions({tabBarVisible:false})
+    }
+    else{
+        navigation.setOptions({tabBarVisible:true})
+    }
     return(
         <Stack.Navigator>
             <Stack.Screen name="My Trips" component={TripsMain}/>

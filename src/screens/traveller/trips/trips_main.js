@@ -59,7 +59,7 @@ const TripCard = ({trip,navigateToPreviewTrip,cancelTrip})=>{
                     <Text style={{marginLeft:5}} >{'Rs '+trip.price}</Text>
                 </View>
                 {   trip.discount > 0 &&
-                    <View style={{flexDirection:"row",borderRadius:5,alignItems:"center",justifyContent:"center",marginBottom:5,backgroundColor:"#2F9AE3"}} >
+                    <View style={{flexDirection:"row",borderRadius:5,alignItems:"center",justifyContent:"center",marginBottom:5,backgroundColor:"#2BB396"}} >
                         <Icon name="md-flame" size={15} color="white" />
                         <Text style={{marginLeft:5,color:"white"}} >{trip.discount+'% off'}</Text>
                     </View>

@@ -118,14 +118,14 @@ export default class Profile extends React.Component{
                   
                 </View>
                 <View style = {{flexDirection : 'row', paddingLeft:4,paddingVertical:10,alignItems:"center"}}>
-                  <MaterialIcon onPress={this.editGender} name="gender-male-female" size={30} />
+                  <MaterialIcon  name="gender-male-female" size={30} />
                   <Text style = {{fontSize:16, paddingLeft:20}}>{this.state.profile.gender}</Text>
                   {/* <View style={{flex:1,alignItems:"flex-end",justifyContent:"center"}} >
                       <MaterialIcon name="circle-edit-outline" size={25} />
                   </View> */}
                 </View>
                 <View style = {{flexDirection : 'row', paddingLeft:5,paddingVertical:10,alignItems:"center"}}>
-                  <MaterialIcon onPress={this.editPhone} name="phone" size={25} />
+                  <MaterialIcon  name="phone" size={25} />
                   <Text style = {{fontSize:16, paddingLeft:20}}>{this.state.profile.phone}</Text>
                   {/* <View style={{flex:1,alignItems:"flex-end",justifyContent:"center"}} >
                       <MaterialIcon name="circle-edit-outline" size={25} />
@@ -135,12 +135,12 @@ export default class Profile extends React.Component{
 
               <View style={{padding:15}}>
                 <Text style = {{fontSize : 24, fontWeight : 'bold', paddingBottom:20}}>Privacy & Security</Text>
-                    <TouchableOpacity>
+                    {/* <TouchableOpacity>
                       <View style = {{flexDirection : 'row', paddingLeft:10,paddingVertical:10,alignItems:"center"}}>
                       <MaterialIcon name="lock-reset" size={25} />
                       <Text style = {{fontSize:16, paddingLeft:20}}>Reset Password</Text>
                     </View>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
 
                     <TouchableOpacity onPress={this.logout} >
                       <View style = {{flexDirection : 'row', paddingLeft:10,paddingVertical:10,alignItems:"center"}}>

@@ -16,16 +16,16 @@ const HomeStack = ({route,navigation})=>{
         <Stack.Navigator >
             <Stack.Screen name="Home" component={Home}
                 options={({navigation})=>({
-                    headerRight:()=>{
-                        return (
-                            <Icons
-                                    onPress={()=>navigation.push("Settings")} 
-                                    name="ios-settings" 
-                                    size={30}
-                                    style={{paddingRight:15}} 
-                            />
-                        )  
-                    }
+                    // headerRight:()=>{
+                    //     return (
+                    //         <Icons
+                    //                 onPress={()=>navigation.push("Settings")} 
+                    //                 name="ios-settings" 
+                    //                 size={30}
+                    //                 style={{paddingRight:15}} 
+                    //         />
+                    //     )  
+                    // }
                 })}
             />
             <Stack.Screen name="Settings" component={Settings}
