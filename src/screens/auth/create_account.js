@@ -1,14 +1,17 @@
 import React,{useState,useCallback,useEffect} from 'react';
-import {StyleSheet,View,Dimensions,TextInput,BackHandler,Text,Alert,StatusBar} from 'react-native';
+import {StyleSheet,View,Dimensions,TextInput,BackHandler,Text,Alert,StatusBar,TouchableOpacity,Image} from 'react-native';
 import {Picker} from '@react-native-community/picker'
 import { connect } from 'react-redux';
 import {store} from '../../redux/store';
-import {createUser,navigateToMainApp} from '../../redux/actions/auth_actions'
+import {createUser} from '../../redux/actions/auth_actions'
 import Loading from '../common/loading'
-import Icon from 'react-native-vector-icons/Ionicons'
-import {StyledButton,StyledPicker,StyledTextInput,Toast} from '../../components/styled_components'
+import ImagePicker from 'react-native-image-picker'
+import {StyledButton,Toast} from '../../components/styled_components'
 import {validateCreateUserForm} from '../../components/validations'
 import { useFocusEffect } from '@react-navigation/native';
+import storage from '@react-native-firebase/storage'
+import auth from '@react-native-firebase/auth'
+import {ProgressBarAndroid} from '@react-native-community/progress-bar-android'
 
 const {width} = Dimensions.get('window')
 
@@ -45,7 +48,9 @@ const CustomePicker = (props)=>{
 const CreateAccount = (props) => {
 
     const [email,setEmail] = useState(props.route.params.email?props.route.params.email:props.email)
+    const [src,setSrc] = useState(null)
     const [picUrl,setPicUrl] = useState(null)
+    const [imageUploading,setImageUploading] = useState(false)
     const [name,setName] = useState("")
     const [city,setCity] = useState("Not Specified")
     const [gender,setGender] = useState("Not Specified")
@@ -97,15 +102,45 @@ const CreateAccount = (props) => {
   const SelectCity = (city)=>{
     setCity(city)
   }
+
+  const selectImage = ()=>{        
+        
+    ImagePicker.launchImageLibrary({},async (response) => {
+        // Same code as in above section!
+        if (response.didCancel) {
+            console.log('User cancelled image picker');
+          } else if (response.error) {
+            console.log('ImagePicker Error: ', response.error);
+          } else {
+            try {
+              setImageUploading(true)
+              setIsLoading(true)
+              const imageUrl = await uploadImage(response.path,response.fileName)
+              setIsLoading(false)
+              setImageUploading(false)
+              setSrc(response.uri)
+              setPicUrl(imageUrl)
+            } 
+            catch (error) {
+              setIsLoading(false)
+              setImageUploading(false)
+              setMsg(error)
+              setToggleToast(true)
+            }
+            //console.log(response)
+          }
+    });
+}
+
   const CreateUser = async()=>{
        try {
+            console.log(picUrl)
             validateCreateUserForm(email,name,gender,city)
             const userProfile = {
               name:name,
               email:email,
               gender:gender,
               city:city,
-              profilePicture:picUrl,
             }
             setIsLoading(true)
             await store.dispatch(createUser(userProfile,props.isOrganizer))
@@ -125,6 +160,22 @@ const CreateAccount = (props) => {
         setToggleToast(true)
        }
    }
+   const uploadImage = (path,filename)=>{
+    return new Promise((res,rej)=>{
+      try {
+        auth().onAuthStateChanged(async(user)=>{
+          const reference = storage().ref('users/'+user.uid+'/'+filename);
+          await reference.putFile(path)
+          const downloadUrl = await reference.getDownloadURL()
+          await user.updateProfile({photoURL:downloadUrl})
+          res(downloadUrl)
+        })
+      } catch (error) {
+        rej(error)
+      }
+    })
+  }
+
     return (
       <>
         <StatusBar barStyle="dark-content" translucent={false} />
@@ -134,6 +185,18 @@ const CreateAccount = (props) => {
           <View style={styles.interactionContainer}>
             <View style={{justifyContent:"flex-start", width:width, paddingLeft:40}} >
               <Text style={{fontSize:22,fontWeight:"bold"}}>Create Account</Text>
+            </View>
+            <View style={{width:width,alignItems:"flex-start",paddingLeft:40}} >
+                <TouchableOpacity onPress={()=>selectImage()} >
+                  {
+                    imageUploading?
+                    <View style={{alignItems:"center",justifyContent:"center",width:80,height:80,borderRadius:10,marginTop:10,borderWidth:1,backgroundColor:"#DFDBDB"}}>
+                      <ProgressBarAndroid  />
+                    </View>
+                    :
+                    <Image style={{width:80,height:80,borderRadius:10,marginTop:10,borderWidth:1,borderColor:"grey"}} source={src?{uri:src}:require('../../assets/profile-placeholder.png')} />
+                  }
+                </TouchableOpacity>
             </View>
             <View style={styles.input} >
               <TextInput style={styles.inputText} 
@@ -193,7 +256,8 @@ const styles = StyleSheet.create({
   container:{
     flex:1,
     alignItems:'center',
-    justifyContent:'center'
+    justifyContent:'center',
+    backgroundColor:"white"
   },
   interactionContainer:{
     flex:1,
