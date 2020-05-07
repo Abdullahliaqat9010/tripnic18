@@ -1,9 +1,9 @@
 import auth, { firebase } from '@react-native-firebase/auth'
 import firestore from '@react-native-firebase/firestore'
 import functions from '@react-native-firebase/functions'
-
 import {LoginManager,AccessToken} from 'react-native-fbsdk'
 import { GoogleSignin, statusCodes } from '@react-native-community/google-signin';
+import {store} from '../store'
 
 GoogleSignin.configure({webClientId:'338070094498-fe0uj618cafu7vfd3uj1v9bv2a74bt9j.apps.googleusercontent.com'});
 
@@ -303,25 +303,35 @@ const sendPhoneVerificationCode = (phone) => {
 }
 
 const verifyCode = (code,verificationId)  => {
-  return new Promise( async (res,rej)=>{
+  return new Promise(  (res,rej)=>{
     try {
-      auth.PhoneAuthProvider.credential()
-      const credentials = auth.PhoneAuthProvider.credential(verificationId,code)
-      await auth().currentUser.updatePhoneNumber(credentials)
-      //console.log("verification")
-      res()
+        const isOrganizer = store.getState().authReducer.isOrganizer
+        const unsubscribe = auth().onAuthStateChanged(async(user)=>{
+          const credentials = auth.PhoneAuthProvider.credential(verificationId,code)
+          await auth().currentUser.updatePhoneNumber(credentials)
+          console.log(auth().currentUser.phoneNumber)
+          await firestore().collection(isOrganizer?'organizers':'travellers').doc(user.uid).update({
+            phone:auth().currentUser.phoneNumber
+          })
+          unsubscribe()
+          res()
+        })
     } 
     catch (error) {
       if(error.code === "auth/invalid-verification-code"){
+        unsubscribe()
         rej("Invalid Verification Code")
       }
       else if(error.code === "auth/session-expired"){
+        unsubscribe()
         rej("Verification Code Expired. Try Resending")
       }
       else if(error.code === "auth/credential-already-in-use"){
+        unsubscribe()
         rej("This mobile number is already registered")
       }
       else{
+        unsubscribe()
         rej(error.message)
       }
       
