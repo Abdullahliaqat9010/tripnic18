@@ -2,6 +2,7 @@ import auth, { firebase } from '@react-native-firebase/auth'
 import firestore from '@react-native-firebase/firestore'
 import functions from '@react-native-firebase/functions'
 import storage from '@react-native-firebase/storage'
+import { store } from '../store'
 
 const uploadImage = (path,filename)=>{
   return new Promise(async(res,rej)=>{
@@ -386,15 +387,20 @@ const unlikeTrip = (id)=>{
   })
 }
 
-const acceptRequest = (traveller_id,trip_id)=>{
+const acceptRequest = (traveller_id,trip_id,notification_id)=>{
   return new Promise((res,rej)=>{
     try {
       const unsubscribe = auth().onAuthStateChanged(async(user)=>{
        if(user){
+          const batch = firestore().batch()
+          const notificationRef = firestore().collection('organizers').doc(user.uid).collection('notifications').doc(notification_id)
           const tripRef = firestore().collection('trips').doc(trip_id)
-          await tripRef.update({
+           batch.update(tripRef,{
             requestedBy:firestore.FieldValue.arrayRemove(traveller_id.toString()),
             acceptedTravellers:firestore.FieldValue.arrayUnion(user.uid.toString())
+          })
+          batch.update(notificationRef,{
+            isResponded:true
           })
           unsubscribe()
           res()
@@ -411,15 +417,22 @@ const acceptRequest = (traveller_id,trip_id)=>{
   })
 }
 
-const declineRequest = (traveller_id,trip_id)=>{
+const declineRequest = (traveller_id,trip_id,notification_id)=>{
   return new Promise((res,rej)=>{
     try {
       const unsubscribe = auth().onAuthStateChanged(async(user)=>{
        if(user){
+          const batch = firestore().batch()
+          const notificationRef = firestore().collection('organizers').doc(user.uid).collection('notifications').doc(notification_id)
           const tripRef = firestore().collection('trips').doc(trip_id)
-          await tripRef.update({
+          batch.update(tripRef,{
             requestedBy:firestore.FieldValue.arrayRemove(traveller_id.toString()),
+            declinedTravellers:firestore.FieldValue.arrayUnion(traveller_id.toString()),
           })
+          batch.update(notificationRef,{
+            isResponded:true
+          })
+          await batch.commit()
           unsubscribe()
           res()
        }
@@ -510,5 +523,105 @@ const isTripLiked = (id)=>{
 }
 
 
+const fetchNotifications = ()=>{
+  return new Promise((res,rej)=>{
+    try {
+      const unsubscribe = auth().onAuthStateChanged(async(user)=>{
+        if(user){
+          const isOrganizer = store.getState().authReducer.isOrganizer
+          const notificationsRef = isOrganizer?firestore().collection('organizers/'+user.uid+'/notifications'):
+                                                firestore().collection('travellers/'+user.uid+'/notifications')
+          const snapshot = await notificationsRef.orderBy('timestamp','desc').get()
+          unsubscribe()
+          res(snapshot.docs.map((doc)=>({...doc.data(),id:doc.id}))) 
+        }
+        else{
+          unsubscribe()
+          rej("You are not authorized here")
+        }
+      })
+    } catch (error) {
+      rej(error.message)
+    }
+  })
+}
 
-export {acceptRequest,declineRequest,fetchRequestedTrips,cancelTripRequest,addNewTrip,fetchTrips,editTrip,fetchTripDetials,deleteTrip,searchTripWithFilter,addTripRequest,likeTrip,unlikeTrip,isRequested,isTripLiked,fetchTopRated,fetchBestOffers,fetchEconomical}
+const fetchTravellerProfile = (id)=>{
+  return new Promise(async(res,rej)=>{
+    try {
+      const doc = await firestore().collection('travellers').doc(id).get()
+      if(doc.exists){
+        res(doc.data())
+      }
+      else{
+        rej("Traveller profile has been deleted recently")
+      }
+    } catch (error) {
+      rej(error.message)
+    }
+  })
+}
+
+const fetchOrganizerProfile = (id)=>{
+  return new Promise(async(res,rej)=>{
+    try {
+      const doc = await firestore().collection('organizers').doc(id).get()
+      if(doc.exists){
+        res(doc.data())
+      }
+      else{
+        rej("Organizer profile has been deleted recently")
+      }
+    } catch (error) {
+      rej(error.message)
+    }
+  })
+}
+
+const deleteNotification = (notification_id)=>{
+  return new Promise((res,rej)=>{
+    try {
+      const unsubscribe = auth().onAuthStateChanged(async(user)=>{
+        if(user){
+          const isOrganizer = store.getState().authReducer.isOrganizer
+          const notificationRef = firestore().collection(isOrganizer?'organizers':'travellers').doc(user.uid).collection('notifications').doc(notification_id)
+          await notificationRef.delete()
+          unsubscribe()
+          res()
+        }
+        else{
+          unsubscribe()
+          rej("You are not authorized here")
+        }
+      })
+
+    } catch (error) {
+      rej(error.message)
+    }
+  })
+}
+
+export {
+        fetchOrganizerProfile,
+        fetchTravellerProfile,
+        fetchNotifications,
+        acceptRequest,
+        declineRequest,
+        fetchRequestedTrips,
+        cancelTripRequest,
+        addNewTrip,
+        fetchTrips,
+        editTrip,
+        fetchTripDetials,
+        deleteTrip,
+        searchTripWithFilter,
+        addTripRequest,
+        likeTrip,
+        unlikeTrip,
+        isRequested,
+        isTripLiked,
+        fetchTopRated,
+        fetchBestOffers,
+        fetchEconomical,
+        deleteNotification
+}
