@@ -133,7 +133,7 @@ export default class NotificationMain extends React.Component{
                 
                 {
                 this.state.isLoading?
-                <ProgressBarAndroid/>:
+                <ProgressBarAndroid color="#2F9AE3" />:
                 <FlatList
                     style={{flex:1}}
                     onRefresh={this.refresh}
