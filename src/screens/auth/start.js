@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet,View,Text,TouchableOpacity,StatusBar,Switch, ImageBackground} from 'react-native';
+import {StyleSheet,View,Text,TouchableOpacity,Image,StatusBar,Switch, ImageBackground} from 'react-native';
 import { connect } from 'react-redux';
 import {store} from '../../redux/store';
 import { facebookLogin, googleLogin, validateUser, navigateToMainApp,changeRole } from '../../redux/actions/auth_actions'
@@ -101,7 +101,8 @@ googleLogin = async()=>{
         <View style={{flex:1}}>
           <View style={styles.background}>
             <ImageBackground style={styles.backgroundImage} source={this.state.currentUser} >
-              <Text style={styles.logoText}>TRIPNIC</Text>
+              {/* <Text style={styles.logoText}>TRIPNIC</Text> */}
+              <Image width={70} height={50} source={require('../../assets/logo_white.png')} />
               <Text style={styles.welcomeText}>Welcome</Text>
               <View style={{width:270}}>
                 <Text style={styles.welcomeMsg}>

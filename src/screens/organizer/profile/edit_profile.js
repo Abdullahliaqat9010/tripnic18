@@ -32,7 +32,7 @@ const Edit = ({navigation,route})=>{
             try {
                 unsubscribe()
                 setIsUpdatingName(true)
-                await firestore().collection('travellers').doc(user.uid).update({
+                await firestore().collection('organizers').doc(user.uid).update({
                     name:name
                 })
                 setIsUpdatingName(false)
@@ -52,7 +52,7 @@ const Edit = ({navigation,route})=>{
             try {
                 unsubscribe()
                 setIsUpdatingGender(true)
-                await firestore().collection('travellers').doc(user.uid).update({
+                await firestore().collection('organizers').doc(user.uid).update({
                     gender:gender
                 })
                 setIsUpdatingGender(false)
@@ -72,7 +72,7 @@ const Edit = ({navigation,route})=>{
             try {
                 unsubscribe()
                 setIsUpdatingCity(true)
-                await firestore().collection('travellers').doc(user.uid).update({
+                await firestore().collection('organizers').doc(user.uid).update({
                     city:city
                 })
                 setIsUpdatingCity(false)

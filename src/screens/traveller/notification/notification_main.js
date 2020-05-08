@@ -126,7 +126,7 @@ export default class NotificationMain extends React.Component{
 
     render(){
         return(
-            <View style={{flex:1,alignItems:"center",justifyContent:"center"}}>
+            <View style={{flex:1,alignItems:"center",justifyContent:"center",backgroundColor:"white"}}>
                 
                 {
                 this.state.isLoading?
@@ -142,10 +142,10 @@ export default class NotificationMain extends React.Component{
                                     height:30,
                                     alignItems:"center",
                                     justifyContent:"center",
-                                    backgroundColor:"#E5E5E5",
+                                    backgroundColor:"#F5F5F5",
                                     
                                     }} >
-                                <Text style={{fontSize:12,fontWeight:"bold",color:'grey'}} >{this.state.notifications.length>0?"Tap and hold for more options":"No Notification"}</Text>
+                                <Text style={{fontSize:12,color:'grey'}} >{this.state.notifications.length>0?"Tap and hold for more options":"No Notification"}</Text>
                             </View>
                         )
                     }}

@@ -163,14 +163,16 @@ const CreateAccount = (props) => {
    const uploadImage = (path,filename)=>{
     return new Promise((res,rej)=>{
       try {
-        auth().onAuthStateChanged(async(user)=>{
+        const unsubscribe = auth().onAuthStateChanged(async(user)=>{
           const reference = storage().ref('users/'+user.uid+'/'+filename);
           await reference.putFile(path)
           const downloadUrl = await reference.getDownloadURL()
           await user.updateProfile({photoURL:downloadUrl})
+          unsubscribe()
           res(downloadUrl)
         })
       } catch (error) {
+        unsubscribe()
         rej(error)
       }
     })

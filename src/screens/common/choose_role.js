@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet,View,Button,Text} from 'react-native';
+import {StyleSheet,View,Image,Text} from 'react-native';
 import { connect } from 'react-redux';
 import {changeRole} from '../../redux/actions/auth_actions'
 import {StyledButton} from '../../components/styled_components'
@@ -22,9 +22,9 @@ class ChooseRole extends React.Component {
   render(){
     return (
       <View style={styles.container}>
-         <View style={{flex:1,justifyContent:"flex-end",alignItems:"center",marginBottom:50}}>
-         <Text style={{fontSize:60,fontWeight:"bold",paddingBottom:80}} >TRIPNIC</Text>
-          <Text style={{fontSize:20}} >Continue as</Text>  
+         <View style={{flex:1,justifyContent:"flex-end",alignItems:"center",marginBottom:100}}>
+         <Image source={require('../../assets/logo_black.png')} />
+           
         </View> 
        <View style={styles.buttonContainer}>
        <View style={{flex:1,paddingHorizontal:20}}>
@@ -50,13 +50,15 @@ const styles = StyleSheet.create({
   container:{
     flex:1,
     alignItems:'center',
-    justifyContent:'center'
+    justifyContent:'center',
+    backgroundColor:"white"
   },
   buttonContainer:{
     flex:1,
     flexDirection:"row",
-    alignItems:'flex-start',
-    justifyContent:'center'
+    alignItems:'flex-end',
+    justifyContent:'center',
+    paddingBottom:50
   },
 
 });

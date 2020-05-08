@@ -241,7 +241,7 @@ const CustomePicker = (props)=>{
       <Picker
           mode="modal"
           selectedValue={selectedValue}
-          style={{ height: 50, width: 160 }}
+          style={{ height:props.height?props.height:50, width: 160 }}
           onValueChange={(itemValue, itemIndex) => {
             props.select?props.select(itemValue):{}
             setSelectedValue(itemValue)
@@ -256,11 +256,11 @@ const CustomePicker = (props)=>{
     )
   }
 
-const StyledPicker = ({width,options,select,title,defaultValue})=>{
+const StyledPicker = ({width,height,options,select,title,defaultValue})=>{
     return(
         <View style={{
             width:width,
-            height:50,
+            height:height?height:50,
             flexDirection:"row",
             borderWidth:1,
             borderRadius:10,
@@ -270,14 +270,17 @@ const StyledPicker = ({width,options,select,title,defaultValue})=>{
         }} >
             <View style={{justifyContent:"center",alignItems:"center",flexDirection:"row"}}>
                 
-                <Text style={{
-                                fontSize:16,
-                                color:"black",
-                                fontWeight:"bold"
-                }} >{title}</Text>
+                {
+                    title &&
+                    <Text style={{
+                        fontSize:16,
+                        color:"black",
+                        fontWeight:"bold"
+        }} >{title}</Text>
+                }
             </View>
             <View style={{flex:1,alignItems:"flex-end"}} >
-                <CustomePicker options={options} select={select} defaultValue={defaultValue} />
+                <CustomePicker options={options} select={select} defaultValue={defaultValue} height={height} />
             </View>
         </View>
     )

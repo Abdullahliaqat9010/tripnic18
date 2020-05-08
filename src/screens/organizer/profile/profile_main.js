@@ -5,10 +5,12 @@ import {store} from '../../../redux/store'
 import {signout} from '../../../redux/actions/auth_actions'
 import {fetchOrganizerProfile} from "../../../redux/actions/app_actions";
 import auth from '@react-native-firebase/auth'
+import {resetPassword} from '../../../redux/actions/auth_actions'
 import {ProgressBarAndroid} from '@react-native-community/progress-bar-android'
 import Icon from 'react-native-vector-icons/Ionicons'
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons'
 import {Toast} from '../../../components/styled_components'
+import EntypoIcon from 'react-native-vector-icons/Entypo'
 
 export default class Profile extends React.Component{
     constructor(props){
@@ -22,14 +24,52 @@ export default class Profile extends React.Component{
       }
     }
 
-    componentDidMount(){
+    _unsubscribe = null
+
+    async componentDidMount(){
+        
+        this._unsubscribe = this.props.navigation.addListener('focus', async() => {
+          this.setState({isProfileLoading:true})
+          this.fetchProfile()
+        });
+        
         this.setState({isProfileLoading:true})
-        this.fetchProfile()
+      this.fetchProfile()
     }
 
-    editProfile = ()=>{
-      this.setState({isEditOpen:true})
+    componentWillUnmount() {
+        this._unsubscribe();
+      }
+
+    resetPassword =  ()=>{
+      const unsubscribe = auth().onAuthStateChanged(async(user)=>{
+        if(user){
+          try {
+            await resetPassword(user.email)
+            this.setState({msg:"Password reset email sent successfully. Check your email inbox"})
+            this.setState({toggleToast:true},()=>{
+              this.setState({toggleToast:false})
+            })
+            unsubscribe()
+          } catch (error) {
+            unsubscribe()
+            this.setState({msg:error.message})
+            this.setState({toggleToast:true},()=>{
+              this.setState({toggleToast:false})
+            })
+          }
+        }
+        else{
+          unsubscribe()
+          this.setState({msg:"You are not authorized here"})
+            this.setState({toggleToast:true},()=>{
+              this.setState({toggleToast:false})
+          })
+        }
+      })
     }
+
+    
 
     logout = async()=>{
       try {
@@ -86,9 +126,9 @@ export default class Profile extends React.Component{
                <View style={{padding:15}}>
                 <View style={{flexDirection:"row",alignItems:"center", paddingBottom:20}} >
                   <Text style = {{fontSize : 24, fontWeight : 'bold'}}>General</Text>
-                  {/* <View style={{flex:1,alignItems:"flex-end",justifyContent:"center"}} >
-                        <MaterialIcon onPress={this.editProfile}  name="circle-edit-outline" size={25} />
-                    </View> */}
+                  <View style={{flex:1,alignItems:"flex-end",justifyContent:"center"}} >
+                        <MaterialIcon onPress={()=>this.props.navigation.navigate("Edit Profile",{profile:this.state.profile})}  name="circle-edit-outline" size={25} />
+                    </View>
                 </View>
                 <View style = {{flexDirection : 'row', paddingLeft:10,paddingVertical:10,alignItems:"center"}}>
                   <Icon name="md-person" size={25} />
@@ -116,11 +156,25 @@ export default class Profile extends React.Component{
                       <MaterialIcon name="circle-edit-outline" size={25} />
                   </View> */}
                 </View>
+                <View style = {{flexDirection : 'row', paddingLeft:5,paddingVertical:10,alignItems:"center"}}>
+                  <EntypoIcon  name="location-pin" size={25} />
+                  <Text style = {{fontSize:16, paddingLeft:20}}>{this.state.profile.city}</Text>
+                  {/* <View style={{flex:1,alignItems:"flex-end",justifyContent:"center"}} >
+                      <MaterialIcon name="circle-edit-outline" size={25} />
+                  </View> */}
+                </View>
               </View>
 
               <View style={{padding:15}}>
-                <Text style = {{fontSize : 24, fontWeight : 'bold', paddingBottom:20}}>Company Info</Text>
-            
+              <View style={{flexDirection:"row",alignItems:"center", paddingBottom:20}} >
+                  <Text style = {{fontSize : 24, fontWeight : 'bold'}}>Company Info</Text>
+                  <View style={{flex:1,alignItems:"flex-end",justifyContent:"center"}} >
+                        <MaterialIcon onPress={()=>this.props.navigation.navigate("Edit Company Info",{profile:this.state.profile})}  name="circle-edit-outline" size={25} />
+                    </View>
+                </View>
+                <View style={{flex:1,alignItems:"flex-end",justifyContent:"center"}} >
+                
+                    </View>
                     <TouchableOpacity >
                       <View style = {{flexDirection : 'row', paddingLeft:10,paddingVertical:10,alignItems:"center"}}>
                       <MaterialIcon name="office-building" size={25} />
@@ -131,7 +185,7 @@ export default class Profile extends React.Component{
                     <TouchableOpacity >
                       <View style = {{flexDirection : 'row', paddingLeft:10,paddingVertical:10,alignItems:"flex-start"}}>
                       <MaterialIcon name="information" size={25} />
-                      <Text style = {{fontSize:16, paddingLeft:20}}>{this.state.profile.about}</Text>
+                      <Text style = {{fontSize:16, paddingLeft:20,paddingRight:35}}>{this.state.profile.about}</Text>
                     </View>
                     </TouchableOpacity>
                 
@@ -139,7 +193,18 @@ export default class Profile extends React.Component{
 
               <View style={{padding:15}}>
                 <Text style = {{fontSize : 24, fontWeight : 'bold', paddingBottom:20}}>Privacy & Security</Text>
-            
+                <TouchableOpacity onPress={()=>this.props.navigation.navigate("Edit Phone")} >
+                      <View style = {{flexDirection : 'row',paddingVertical:10,alignItems:"center"}}>
+                      <Icon name="ios-phone-portrait" size={25} style={{marginLeft:15}} />
+                      <Text style = {{fontSize:16, paddingLeft:30}}>Change Phone Number</Text>
+                    </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={this.resetPassword} >
+                      <View style = {{flexDirection : 'row', paddingLeft:10,paddingVertical:10,alignItems:"center"}}>
+                      <MaterialIcon name="lock-reset" size={25} />
+                      <Text style = {{fontSize:16, paddingLeft:20}}>Reset Password</Text>
+                    </View>
+                    </TouchableOpacity>
                     <TouchableOpacity onPress={this.logout} >
                       <View style = {{flexDirection : 'row', paddingLeft:10,paddingVertical:10,alignItems:"center"}}>
                       <MaterialIcon name="logout" size={25} />

@@ -1,5 +1,6 @@
 const validateEmail = (email)=>{
-    var regrex = /^\w+[\w-\.]*\@\w+((-\w+)|(\w*))\.[a-z]{2,3}$/
+    //var regrex = /^\w+[\w-\.]*\@\w+((-\w+)|(\w*))\.[a-z]{2,3}$/
+    var regrex = /[\w-]+@([\w-]+\.)+[\w-]+/
     return regrex.test(email)
 }
 
