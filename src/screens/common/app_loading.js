@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet,View,Text,Alert} from 'react-native';
+import {StyleSheet,View,Image,Alert} from 'react-native';
 import {store} from '../../redux/store';
 import {navigateToMainApp, signout, validateUserOnStart } from '../../redux/actions/auth_actions'
 import {ProgressBarAndroid} from '@react-native-community/progress-bar-android'
@@ -49,8 +49,8 @@ export default class AppLoading extends React.Component {
   render(){
     return(
       <View style={styles.container}>
-        <Text style={{fontSize:60,fontWeight:"bold",paddingBottom:80}} >TRIPNIC</Text>
-        <ProgressBarAndroid color="#2F9AE3" />
+        <Image source={require('../../assets/logo_black.png')}/>
+        <ProgressBarAndroid styleAttr="Small" color="grey" />
         {/* <Text>Loading App...</Text> */}
       </View>
     ) 
@@ -62,7 +62,8 @@ const styles = StyleSheet.create({
   container:{
     flex:1,
     alignItems:'center',
-    justifyContent:'center'
+    justifyContent:'center',
+    backgroundColor:"white"
   },
 
 });

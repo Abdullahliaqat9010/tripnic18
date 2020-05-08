@@ -205,7 +205,7 @@ const signout = () => dispatch => {
 
 // Reset password with Firebase
 const resetPassword = email => {
-  return auth().sendPasswordResetEmail(email)
+    return auth().sendPasswordResetEmail(email)
 };
 
 const facebookLogin = () => {
